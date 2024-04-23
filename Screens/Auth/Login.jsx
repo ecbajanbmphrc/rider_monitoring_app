@@ -32,16 +32,19 @@ function LoginPage({props}){
                     <TouchableOpacity
                     onPress = {() => setShowPassword(!showPassword)}>
                     {showPassword ? (
-                    <Feather
-                     name="eye-off"
-                     style={{marginRight: -1}}
-                     color={'black'}
-                     size={20}
-                    />
-                      )  :  ( 
+
                     <Feather
                      name="eye"
                      style={{marginRight:-1}}
+                     color={'black'}
+                     size={20}
+                    />  
+                      
+                      )  :  (
+
+                    <Feather
+                     name="eye-off"
+                     style={{marginRight: -1}}
                      color={'black'}
                      size={20}
                     />

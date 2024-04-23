@@ -24,6 +24,7 @@ function RegisterPage({props}){
     const [showPassword, setShowPassword] = useState(false);
     const [checked, setChecked] = React.useState(true);
     const toggleCheckbox = () => setChecked(!checked);
+    const pass = () => useState(false);
 
     function handleName(e){
         
@@ -64,6 +65,10 @@ function RegisterPage({props}){
             setPassword(passwordVar);
             setPasswordVerify(true);
         }
+    }
+
+    function togglePassword(){
+
     }
 
     const navigation = useNavigation();
@@ -149,7 +154,7 @@ function RegisterPage({props}){
                     <TextInput 
                     placeholder="Password" 
                     style={styles.textInput}
-                   
+                    secureTextEntry={showPassword}
                     onChange={e => handlePassword(e)}
                     />
                       
@@ -172,7 +177,7 @@ function RegisterPage({props}){
                     style = {{marginStart:-10, marginTop:-5}}>
                   <CheckBox
                     checked={checked}
-                    onPress={toggleCheckbox}
+                    onPress={ () => {toggleCheckbox(); setShowPassword(!showPassword);}}
                     iconType="material-community"
                     checkedIcon="checkbox-marked"
                     uncheckedIcon="checkbox-blank-outline"
