@@ -1,15 +1,43 @@
-const {View, Text,Image, TextInput, TouchableOpacity} = require('react-native');
+const {
+    View, 
+    Text,
+    Image, 
+    TextInput, 
+    TouchableOpacity, 
+    ScrollView,
+    Alert} = require('react-native');
 import styles from './style';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation} from '@react-navigation/native';
 import { useState } from 'react';
+import axios from 'axios';
 function LoginPage({props}){
+
     const [showPassword, setShowPassword] = useState(true);
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
     const navigation = useNavigation();
+
+    function handleLogin(){
+        console.log(email, password);
+        const userData = {
+            email: email,
+            password,
+        }
+        axios.post("http://192.168.50.139:8082/login-user", userData)
+        .then(res => {console.log(res.data)
+        if(res.data.status === 200){
+            Alert.alert('Login Successfull');
+            navigation.navigate('Home');
+        }
+        });
+    }
     return(
+    <ScrollView 
+     contentContainerStyle = {{flexGrow: 10}} 
+     keyboardShouldPersistTaps = {"always"}
+     style={{backgroundColor: 'white'}}>
         <View>
             <View style={styles.logoContainer}>
                 <Image style={styles.logo} source = {require('../../assets/bmp.png')}/>
@@ -19,7 +47,10 @@ function LoginPage({props}){
 
                 <View style= {styles.action}>
                     <FontAwesome name="envelope" color="#420475" style={styles.emailIcon}/>
-                    <TextInput placeholder="Email" style={styles.textInput}/>
+                    <TextInput 
+                    placeholder="Email" 
+                    style={styles.textInput}
+                    onChange={e => setEmail(e.nativeEvent.text)}/>
                 </View>
 
                 <View style= {styles.action}>
@@ -28,6 +59,7 @@ function LoginPage({props}){
                     placeholder="Password" 
                     style={styles.textInput}
                     secureTextEntry={showPassword}
+                    onChange={e => setPassword(e.nativeEvent.text)}
                     />
                     <TouchableOpacity
                     onPress = {() => setShowPassword(!showPassword)}>
@@ -66,7 +98,9 @@ function LoginPage({props}){
                 </View>
             </View>
                 <View style={styles.button}>
-                    <TouchableOpacity style={styles.loginButton}>
+                    <TouchableOpacity 
+                     style={styles.loginButton}
+                     onPress={() => handleLogin()}>
                         <View>
                             <Text style={styles.textSign}>
                                 Login
@@ -86,7 +120,8 @@ function LoginPage({props}){
                         </View>
                     </TouchableOpacity>
                 </View>
-        </View>
+         </View>
+    </ScrollView>
     );
 }
 

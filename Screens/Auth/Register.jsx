@@ -1,39 +1,111 @@
-const {View, Text,Image, TextInput, TouchableOpacity, ScrollView} = require('react-native');
+const {View, Text,Image, TouchableOpacity, ScrollView, Alert} = require('react-native');
 import styles from './style';
-import Feather from 'react-native-vector-icons/Feather';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { TextInput } from 'react-native-paper';
 import { useNavigation} from '@react-navigation/native';
 import { useState } from 'react';
 import { CheckBox } from '@rneui/themed';
-import { Stack } from '@rneui/layout';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import Error from 'react-native-vector-icons/MaterialIcons';
 import * as React from "react";
+import axios from 'axios';
 
 
 function RegisterPage({props}){
 
-    const [name, setName] = useState('');
-    const [nameVerify, setNameVerify] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [firstNameVerify, setFirstNameVerify] = useState(false);
+    const [middleName, setMiddleName] = useState('');
+    const [middleNameVerify, setMiddleNameVerify] = useState(false);
+    const [lastName, setLastName] = useState('');
+    const [lastNameVerify, setLastNameVerify] = useState(false);
     const [email, setEmail] = useState('');
     const [emailVerify, setEmailVerify] = useState(false);
     const [phone, setPhone] = useState('');
     const [phoneVerify, setPhoneVerify] = useState(false);
+    const [address, setAddress] = useState('');
+    const [addressVerify, setAddressVerify] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordVerify, setPasswordVerify] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [confirmPasswordVerify, setConfirmPasswordVerify] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [checked, setChecked] = React.useState(true);
+    const [checked, setChecked] = useState(false);
     const toggleCheckbox = () => setChecked(!checked);
-    const pass = () => useState(false);
+    // const pass = () => useState(false);
 
-    function handleName(e){
+    function handleSubmit(){
+
+        const userData = {
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+            address: address,
+            password: password,
+        };
+       
+        if(firstNameVerify && lastNameVerify && passwordVerify && phoneVerify && confirmPasswordVerify){
+            if(password !== confirmPassword)  return  Alert.alert("Password does not match")
+            
+            axios
+            .post("http://192.168.50.139:8082/register", userData)
+            .then(res => {console.log(res.data)
+
+            if(res.data.status == 200){
+              Alert.alert("Registered Successfully!");
+              navigation.navigate('Login');
+             }else{    
+              Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
+                {
+                    text: 'OK'
+                }
+              ]);
+             }
+             
+
+            })
+            .catch(e => console.log(e));
+            
+        }
+        else{
+           
+            Alert.alert("Fill required details")
+        }   
         
-        const nameVar = e.nativeEvent.text;
-        setName(nameVar);
-        setNameVerify(false);
+        
 
-        if (nameVar.length > 1){
-            setNameVerify(true);
+        
+    }
+
+    function handleFirstName(e){
+        
+        const firstNameVar = e.nativeEvent.text;
+        setFirstName(firstNameVar);
+        setFirstNameVerify(false);
+
+        if (firstNameVar.length > 1){
+            setFirstNameVerify(true);
+        }
+    }
+
+    function handleMiddleName(e){
+        
+        const middleNameVar = e.nativeEvent.text;
+        setMiddleName(middleNameVar);
+        setMiddleNameVerify(false);
+
+        if (middleNameVar.length > 1){
+            setMiddleNameVerify(true);
+        }
+    }
+
+    function handleLastName(e){
+        
+        const lastNameVar = e.nativeEvent.text;
+        setLastName(lastNameVar);
+        setLastNameVerify(false);
+
+        if (lastNameVar.length > 1){
+            setLastNameVerify(true);
         }
     }
 
@@ -51,9 +123,19 @@ function RegisterPage({props}){
         const phoneVar = e.nativeEvent.text;
         setPhone(phoneVar)
         setPhoneVerify(false);
-        if(/[0]{1}[0-9]{10}/.test(phoneVar)){
+        if(/([0])([9])([0-9]{9})/.test(phoneVar)){
             setPhone(phoneVar);
             setPhoneVerify(true);
+        }
+    }
+
+    function handleAddress(e){
+        const addressVar = e.nativeEvent.text;
+        setAddress(addressVar)
+        setAddressVerify(false);
+
+        if (addressVar.length > 1){
+            setAddressVerify(true);
         }
     }
 
@@ -67,13 +149,23 @@ function RegisterPage({props}){
         }
     }
 
-    function togglePassword(){
-
+    function handleConfirmPassword(e){
+         const confirmPasswordVar = e.nativeEvent.text;
+        setConfirmPassword(confirmPasswordVar)
+        setConfirmPasswordVerify(false);
+        // if(confirmPasswordVar !== passwordVar){
+            setConfirmPassword(confirmPasswordVar);
+            setConfirmPasswordVerify(true);
+        // }
     }
+
+   
 
     const navigation = useNavigation();
     return(
-      <ScrollView contentContainerStyle={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}} 
+      showsVerticalScrollIndicator={false}
+      style={{backgroundColor: 'white'}}>
         <View>
             <View style={styles.logoContainer}>
                 <Image style={styles.logo} source = {require('../../assets/bmp.png')}/>
@@ -81,40 +173,121 @@ function RegisterPage({props}){
             <View style={styles.loginContainer}>
                 <Text style={styles.text_header}>Register</Text>
 
-                <View style= {styles.action}>
-                    <FontAwesome name="user" color="#420475" style={styles.emailIcon}/>
-                    <TextInput placeholder="Name" 
-                    style={styles.textInput} 
-                    onChange={e => handleName(e)}
-                    />
-                    { name.length < 1 ? null : nameVerify ? (
-                        <Feather name="check-circle" color="green" size={20}/>
+                <View style = {styles.textInputRegistration}>
+                    <TextInput 
+                    autoCapitalize={"words"}
+                    mode="outlined"
+                    label="First Name"
+                    placeholder="Enter your first name"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleFirstName(e)}
+                    theme={{ roundness: 8 }}
+                    right= { firstName.length < 1 ? null : firstNameVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
                     ) : (
-                        <Error name ="error" color="red" size={20}/>
-                    )}                
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
                 </View>
-                {name.length < 1 ? null : nameVerify ? null : (
+               
+                {firstName.length < 1 ? null : firstNameVerify ? null : (
                         <Text
                             style={{
                                 marginLeft:20,
                                 color:'red',
                         }}>
-                                Name should be more than 1 character.
+                                First name should be more than 1 character.
                         </Text>
                 )}
-                <View style= {styles.action}>
-                    <FontAwesome name="envelope" color="#420475" style={styles.emailIcon}/>
+
+                <View style = {styles.textInputRegistration}>
                     <TextInput 
-                    placeholder="Email" 
-                    style={styles.textInput}
-                    onChange={e => handleEmail(e)}
-                    />
-                    { email.length < 1 ? null : emailVerify ? (
-                        <Feather name="check-circle" color="green" size={20}/>
+                    mode="outlined"
+                    label="Middle Name"
+                    placeholder="Enter your middle name"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleMiddleName(e)}
+                    theme={{ roundness: 8 }}
+                    right= { middleName.length < 1 ? null : middleNameVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
                     ) : (
-                        <Error name ="error" color="red" size={20}/>
-                    )}   
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
                 </View>
+               
+                {middleName.length < 1 ? null : middleNameVerify ? null : (
+                        <Text
+                            style={{
+                                marginLeft:20,
+                                color:'red',
+                        }}>
+                                Middle name should be more than 1 character.
+                        </Text>
+                )}
+
+                <View style = {styles.textInputRegistration}>
+                    <TextInput 
+                    mode="outlined"
+                    label="Last Name"
+                    placeholder="Enter your last name"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleLastName(e)}
+                    theme={{ roundness: 8 }}
+                    right= { lastName.length < 1 ? null : lastNameVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
+                    ) : (
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
+                </View>
+               
+                {lastName.length < 1 ? null : lastNameVerify ? null : (
+                        <Text
+                            style={{
+                                marginLeft:20,
+                                color:'red',
+                        }}>
+                                Last name should be more than 1 character.
+                        </Text>
+                )}
+
+                <View style = {styles.textInputRegistration}>
+                    <TextInput 
+                    mode="outlined"
+                    label="Email"
+                    placeholder="Enter your email"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleEmail(e)}
+                    theme={{ roundness: 8 }}
+                    right= { email.length < 1 ? null : emailVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
+                    ) : (
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
+                </View>
+               
                 {email.length < 1 ? null : emailVerify ? null : (
                         <Text
                             style={{
@@ -125,54 +298,136 @@ function RegisterPage({props}){
                         </Text>
                 )}
 
-                <View style= {styles.action}>
-                    <FontAwesome name="phone" color="#420475" style={styles.emailIcon}/>
+                <View style = {styles.textInputRegistration}>
                     <TextInput 
-                    placeholder="Phone number" 
-                    style={styles.textInput}
+                    mode="outlined"
+                    keyboardType='numeric'
+                    label="Phone Number"
+                    placeholder="Enter your phone number"
+                    placeholderTextColor="#76ABAE" 
                     onChange={e => handlePhone(e)}
+                    theme={{ roundness: 8 }}
                     maxLength={11}
-                    />
-                    { phone.length < 1 ? null : phoneVerify ? (
-                        <Feather name="check-circle" color="green" size={20}/>
+                    right= { phone.length < 1 ? null : phoneVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
                     ) : (
-                        <Error name ="error" color="red" size={20}/>
-                    )}  
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
                 </View>
+               
                 {phone.length < 1 ? null : phoneVerify ? null : (
                         <Text
                             style={{
                                 marginLeft:20,
                                 color:'red',
                         }}>
-                                Please enter valid phone number
+                                Please enter valid phone number.
                         </Text>
                 )}
 
-                <View style= {styles.action}>
-                    <FontAwesome name="lock" color="#420475" style={styles.passwordIcon}/>
+                <View style = {styles.textInputRegistration}>
                     <TextInput 
-                    placeholder="Password" 
-                    style={styles.textInput}
-                    secureTextEntry={showPassword}
-                    onChange={e => handlePassword(e)}
-                    />
-                      
-                     { password.length < 1 ? null : passwordVerify ? (
-                        <Feather name="check-circle" color="green" size={20} style={{marginEnd: -1}}/>
+                    multiline
+                    numberOfLines={2}
+                    mode="outlined"
+                    label="Home Address"
+                    placeholder="Enter your home address"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleAddress(e)}
+                    theme={{ roundness: 8 }}
+                    right= { address.length < 1 ? null : addressVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
                     ) : (
-                        <Error name ="error" color="red" size={20} style={{marginEnd: -1}}/>
-                    )}  
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
                 </View>
+               
+                {address.length < 1 ? null : addressVerify ? null : (
+                        <Text
+                            style={{
+                                marginLeft:20,
+                                color:'red',
+                        }}>
+                            Home address should be more than 1 character.
+                        </Text>
+                )}
+
+                <View style = {styles.textInputRegistration}>
+                    <TextInput 
+                    mode="outlined"
+                    label="Password"
+                    placeholder="Enter your password"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handlePassword(e)}
+                    secureTextEntry={!showPassword}
+                    theme={{ roundness: 8 }}
+                    right= { password.length < 1 ? null : passwordVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
+                    ) : (
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                       
+                    />                         
+                </View>
+               
                 {password.length < 1 ? null : passwordVerify ? null : (
                         <Text
                             style={{
                                 marginLeft:20,
                                 color:'red',
                         }}>
-                                Password should be mix of lowercase, uppercase and number.
+                            Password should be mix of a lowercase, uppercase and number.
                         </Text>
                 )}
+
+                <View style = {styles.textInputRegistration}>
+                    <TextInput 
+                    mode="outlined"
+                    label="Confirm Password"
+                    placeholder="Re-enter your password"
+                    placeholderTextColor="#76ABAE" 
+                    onChange={e => handleConfirmPassword(e)}
+                    secureTextEntry={!showPassword}
+                    theme={{ roundness: 8 }}
+                    // right= { confirmPassword.length < 1 ? null : confirmPasswordVerify ? (
+                    //     <TextInput.Icon 
+                    //     color="green"
+                    //     icon="check" />
+                    // ) : (
+                    //     <TextInput.Icon 
+                    //     color="red"
+                    //     icon="exclamation" />
+                    // )} 
+                       
+                    />                         
+                </View>
+{/*                
+                {confirmPassword.length < 1 ? null :  confirmPasswordVerify ? null : (
+                        <Text
+                            style={{
+                                marginLeft:20,
+                                color:'red',
+                        }}>
+                            Password does not match!
+                        </Text>
+                )} */}
+    
                 <View 
                     style = {{marginStart:-10, marginTop:-5}}>
                   <CheckBox
@@ -189,7 +444,9 @@ function RegisterPage({props}){
 
             </View>
                 <View style={styles.button}>
-                    <TouchableOpacity style={styles.loginButton}>
+                    <TouchableOpacity 
+                    style={styles.loginButton}
+                    onPress={() => handleSubmit()}>
                         <View>
                             <Text style={styles.textSign}>
                                 Register
