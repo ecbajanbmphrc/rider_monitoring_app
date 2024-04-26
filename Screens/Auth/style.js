@@ -51,6 +51,15 @@ mainContainer: {
     borderColor: '#420475',
     borderRadius: 10,
   },
+  textInputRegistration: {
+    paddingTop: 10,
+    paddingBottom: 1,
+
+  },
+  textInputRegistrationStyle: {
+
+    roundness: 200
+  },
   textInput: {
     flex: 1,
     marginTop: -12,
