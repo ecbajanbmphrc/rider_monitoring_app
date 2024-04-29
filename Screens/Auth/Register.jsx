@@ -43,8 +43,8 @@ function RegisterPage({props}){
             password: password,
         };
        
-        if(firstNameVerify && lastNameVerify && passwordVerify && phoneVerify && confirmPasswordVerify){
-            if(password !== confirmPassword)  return  Alert.alert("Password does not match")
+        if(firstNameVerify && lastNameVerify && emailVerify && addressVerify && passwordVerify && phoneVerify && confirmPasswordVerify){
+            if(password !== confirmPassword)  return  Alert.alert('Password does not match')
             
             axios
             .post("http://192.168.50.139:8082/register", userData)

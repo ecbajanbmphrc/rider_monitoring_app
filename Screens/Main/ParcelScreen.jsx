@@ -2,15 +2,16 @@ import React from 'react';
 const {Text, StyleSheet, View} = require('react-native');
 
  
-function ProfileScreen() {
+function ParcelScreen() {
     return (
       <View style={styles.viewStyle}>
-        <Text style={styles.textStyle}>This is Profile Screen</Text>
+        <Text style={styles.textStyle}>This is Parcel Screen</Text>
       </View>
+        
     );
 }
 
-export default ProfileScreen;
+export default ParcelScreen;
 
 const styles = StyleSheet.create({
     viewStyle: {

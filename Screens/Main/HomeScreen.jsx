@@ -4,14 +4,14 @@ function HomeScreen(props) {
   console.log(props);
   return (
     <View style={styles.viewStyle}>
-      <Text style={styles.headingStyle}>Home Screen</Text>
-      {/* <Text style={styles.textStyle}>This is Home Screen</Text> */}
-      {/* <Button
-        title="Profile"
-        onPress={() => props.navigation.navigate('Profile',{
-          name:"Aadarsh"
-        })}
-      /> */}
+  
+     <Text style={styles.textStyle}>This is Home Screen</Text>
+     <Button
+      title="Profile"
+      onPress={() => props.navigation.navigate('Profile', {
+        name:"Eman"
+      })}
+      />
     </View>
   );
 }

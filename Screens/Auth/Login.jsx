@@ -12,11 +12,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation} from '@react-navigation/native';
 import { useState } from 'react';
 import axios from 'axios';
+
 function LoginPage({props}){
 
     const [showPassword, setShowPassword] = useState(true);
     const [email, setEmail] = useState('');
+    const [emailVerify, setEmailVerify] = useState(false);
     const [password, setPassword] = useState('');
+    const [passwordVerify, setPasswordVerify] = useState(false);
     const navigation = useNavigation();
 
     function handleLogin(){
@@ -25,19 +28,47 @@ function LoginPage({props}){
             email: email,
             password,
         }
+      if(!emailVerify) return Alert.alert('Please input your email!');
+      if(!passwordVerify) return Alert.alert('Please input your password!');
         axios.post("http://192.168.50.139:8082/login-user", userData)
-        .then(res => {console.log(res.data)
+        .then(
+        res => {console.log(res.data)
         if(res.data.status === 200){
-            Alert.alert('Login Successfull');
-            navigation.navigate('Home');
-        }
+            Alert.alert('Login Successful');
+            navigation.navigate('DrawerMain');
+        }else if(res.data.status === 401) {
+            Alert.alert('Login Failed!', 'Invalid email or password');
+             }
         });
+    
+    }
+
+    function handleEmail(e){
+        const emailVar = e.nativeEvent.text;
+       setEmail(emailVar)
+       setEmailVerify(false);
+       // if(confirmPasswordVar !== passwordVar){
+           setEmail(emailVar);
+           setEmailVerify(true);
+       // }
+    }
+
+   function handlePassword(e){
+         const passwordVar = e.nativeEvent.text;
+        setPassword(passwordVar)
+        setPasswordVerify(false);
+        // if(confirmPasswordVar !== passwordVar){
+            setPassword(passwordVar);
+            setPasswordVerify(true);
+        // }
     }
     return(
+        
     <ScrollView 
      contentContainerStyle = {{flexGrow: 10}} 
      keyboardShouldPersistTaps = {"always"}
      style={{backgroundColor: 'white'}}>
+    
         <View>
             <View style={styles.logoContainer}>
                 <Image style={styles.logo} source = {require('../../assets/bmp.png')}/>
@@ -50,7 +81,7 @@ function LoginPage({props}){
                     <TextInput 
                     placeholder="Email" 
                     style={styles.textInput}
-                    onChange={e => setEmail(e.nativeEvent.text)}/>
+                    onChange={e => {setEmail(e.nativeEvent.text); handleEmail(e);}}/>
                 </View>
 
                 <View style= {styles.action}>
@@ -59,7 +90,7 @@ function LoginPage({props}){
                     placeholder="Password" 
                     style={styles.textInput}
                     secureTextEntry={showPassword}
-                    onChange={e => setPassword(e.nativeEvent.text)}
+                    onChange={e => {setPassword(e.nativeEvent.text); handlePassword(e);}}
                     />
                     <TouchableOpacity
                     onPress = {() => setShowPassword(!showPassword)}>

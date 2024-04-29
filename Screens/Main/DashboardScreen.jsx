@@ -2,15 +2,16 @@ import React from 'react';
 const {Text, StyleSheet, View} = require('react-native');
 
  
-function ProfileScreen() {
+function DashboardScreen() {
     return (
       <View style={styles.viewStyle}>
-        <Text style={styles.textStyle}>This is Profile Screen</Text>
+        <Text style={styles.textStyle}>This is Dashboard Screen</Text>
       </View>
+        
     );
 }
 
-export default ProfileScreen;
+export default DashboardScreen;
 
 const styles = StyleSheet.create({
     viewStyle: {
