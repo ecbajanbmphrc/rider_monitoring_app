@@ -2,15 +2,16 @@ import React from 'react';
 const {Text, StyleSheet, View} = require('react-native');
 
  
-function ProfileScreen() {
+function ItemScreen() {
     return (
       <View style={styles.viewStyle}>
-        <Text style={styles.textStyle}>This is Profile Screen</Text>
+        <Text style={styles.textStyle}>This is Input Item Screen</Text>
       </View>
+        
     );
 }
 
-export default ProfileScreen;
+export default ItemScreen;
 
 const styles = StyleSheet.create({
     viewStyle: {
