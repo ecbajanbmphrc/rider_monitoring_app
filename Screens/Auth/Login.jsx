@@ -12,15 +12,21 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation} from '@react-navigation/native';
 import { useState } from 'react';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DashboardScreen from '../Main/DashboardScreen';
+import App from '../../App';
 
-function LoginPage({props}){
+function LoginPage({navigation}){
 
     const [showPassword, setShowPassword] = useState(true);
     const [email, setEmail] = useState('');
     const [emailVerify, setEmailVerify] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordVerify, setPasswordVerify] = useState(false);
-    const navigation = useNavigation();
+    
+
+
+    // const navigation = useNavigation();
 
     function handleLogin(){
         console.log(email, password);
@@ -35,6 +41,10 @@ function LoginPage({props}){
         res => {console.log(res.data)
         if(res.data.status === 200){
             Alert.alert('Login Successful');
+            AsyncStorage.setItem('token', res.data.data);
+            AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+            setEmail('');
+            setPassword(''); 
             navigation.navigate('DrawerMain');
         }else if(res.data.status === 401) {
             Alert.alert('Login Failed!', 'Invalid email or password');
@@ -44,23 +54,23 @@ function LoginPage({props}){
     }
 
     function handleEmail(e){
+
         const emailVar = e.nativeEvent.text;
-       setEmail(emailVar)
-       setEmailVerify(false);
-       // if(confirmPasswordVar !== passwordVar){
-           setEmail(emailVar);
-           setEmailVerify(true);
-       // }
+        setEmailVerify(false);  
+        setEmail(emailVar);
+        if (emailVar !== ''){
+           setEmailVerify(true);    
+        }        
     }
 
    function handlePassword(e){
-         const passwordVar = e.nativeEvent.text;
-        setPassword(passwordVar)
-        setPasswordVerify(false);
-        // if(confirmPasswordVar !== passwordVar){
-            setPassword(passwordVar);
-            setPasswordVerify(true);
-        // }
+
+        const passwordVar = e.nativeEvent.text;
+        setPasswordVerify(false);   
+        setPassword(passwordVar);
+        if (passwordVar !== ''){
+           setPasswordVerify(true);    
+        }
     }
     return(
         
@@ -81,7 +91,10 @@ function LoginPage({props}){
                     <TextInput 
                     placeholder="Email" 
                     style={styles.textInput}
-                    onChange={e => {setEmail(e.nativeEvent.text); handleEmail(e);}}/>
+                    value={email}
+                    onChange={handleEmail}
+
+                    />
                 </View>
 
                 <View style= {styles.action}>
@@ -90,7 +103,9 @@ function LoginPage({props}){
                     placeholder="Password" 
                     style={styles.textInput}
                     secureTextEntry={showPassword}
-                    onChange={e => {setPassword(e.nativeEvent.text); handlePassword(e);}}
+                    value={password}
+                    onChange={handlePassword}
+              
                     />
                     <TouchableOpacity
                     onPress = {() => setShowPassword(!showPassword)}>

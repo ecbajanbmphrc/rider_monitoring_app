@@ -6,7 +6,7 @@ import {  createDrawerNavigator, DrawerContentScrollView, DrawerItemList, Drawer
 import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-
+import { useState, useEffect } from 'react';
 import HomeScreen from './Screens/Main/HomeScreen';
 import ProfileScreen from './Screens/Main/ProfileScreen';
 // import UserScreen from './Screens/Main/UserScreen'; 
@@ -18,35 +18,57 @@ import CustomDrawerLayout from './Custom_layout/js/customDrawerLayout';
 import DashboardScreen from './Screens/Main/DashboardScreen';
 import AttendanceScreen from './Screens/Main/AttendanceScreen';
 import ParcelScreen from './Screens/Main/ParcelScreen';
-const Stack = createNativeStackNavigator();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
+const Stack = createNativeStackNavigator();
 
 const Drawer = createDrawerNavigator();
 
+const StackNav = () => {
+  const navigation = useNavigation();
+  return(
+    <Stack.Navigator
+    screenOptions={{
+      statusBarColor: '#0163d2',
+      headerShown: false,
+      headerStyle: {
+        backgroundColor: '#0163d2',
+      },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center',
+    }}>
+    <Stack.Screen name="LoginForm" component={LoginNav}/>     
+    </Stack.Navigator>
+  );
+};
 const CustomDrawerNav = () => {
   return(
     <Drawer.Navigator
     drawerContent={(props) => <CustomDrawerLayout {...props} />}>
-    {/* <View>
-      <Text>
-        Test123
-      </Text>
-    </View> */}
     <Drawer.Screen name="Dashboard" component={DashboardScreen} />
     <Drawer.Screen name="Attendance" component={AttendanceScreen} />
     <Drawer.Screen name="Parcel" component={ParcelScreen} />
     <Drawer.Screen name="Home" component={HomeScreen} />
     <Drawer.Screen name="Profile" component={ProfileScreen} />
+    <Stack.Screen 
+        name="Login"  
+        component={LoginPage} 
+        options={{ 
+         contentStyle:{
+         
+          animation:'slide_from_right'
+          }}}/>
+   
+   
   </Drawer.Navigator>
 
   );
 }
 
-export default function App() {
-    
-  return (
-    <NavigationContainer>
-      <Stack.Navigator 
+const LoginNav = () => {
+  return(
+  <Stack.Navigator 
         screenOptions={{
          headerShown:false,   
         }}>
@@ -66,9 +88,28 @@ export default function App() {
            animationTypeForReplace: 'push',
            animation:'slide_from_left'
           }}}
-        />
-        <Stack.Screen name="DrawerMain" component={CustomDrawerNav}/>     
-      </Stack.Navigator>
+        />  
+       <Stack.Screen name="DrawerMain" component={CustomDrawerNav}/>   
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  async function getData(){
+    const data = await AsyncStorage.getItem('isLoggedIn');
+    setIsLoggedIn(data);
+
+  }
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  return (
+    
+    <NavigationContainer>
+      {isLoggedIn ? <CustomDrawerNav/> : <LoginNav name="Login"/>}
     </NavigationContainer>
   );
 }
