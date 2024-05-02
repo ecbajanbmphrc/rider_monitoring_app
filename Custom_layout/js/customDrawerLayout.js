@@ -1,4 +1,4 @@
-import * as React from 'react';
+// import * as React from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import { View, Button, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -10,7 +10,14 @@ import {
   DrawerItem,
 } from '@react-navigation/drawer';
 
+import React, { useEffect, useState } from 'react';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
 
 const DrawerList = [
   {icon: 'chart-box-outline', label: 'Dashboard', navigateTo: 'Dashboard'},
@@ -23,7 +30,10 @@ const DrawerList = [
 ];
 
 const DrawerLayout = ({icon, label, navigateTo}) => {
+  
+  
   const navigation = useNavigation();
+
   // console.log(userData);
   return (
     <DrawerItem
@@ -50,6 +60,28 @@ const DrawerItems = props => {
 };
 
 function CustomDrawerLayout(props) {
+  const navigation = useNavigation();
+  function signOut(){
+    AsyncStorage.setItem('isLoggedIn','');
+    AsyncStorage.setItem('token','');
+    navigation.navigate('Login');
+  }
+
+
+  const [userData, setUserData] = useState("");
+
+  async function getData(){
+    const token = await AsyncStorage.getItem('token');
+    console.log(token);
+    axios.post("http://192.168.50.139:8082/userdata" , {token: token})
+    .then(res => {
+    console.log(res.data)
+    setUserData(res.data.data)});
+  }
+  useEffect(() => { 
+    getData();
+  }, []);
+
   return (
     <View style={{flex: 1}}>
     <DrawerContentScrollView {...props}>
@@ -65,9 +97,9 @@ function CustomDrawerLayout(props) {
                 style={{marginTop: 5, backgroundColor: '#FFF7F1'}}
               />
               <View style={{marginLeft: 10, flexDirection: 'column'}}>
-                <Title style={styles.title}>Name</Title>
+                <Title style={styles.title}> {userData.first_name}</Title>
                 <Text style={styles.caption} numberOfLines={1}>
-                  email@email.com
+                 {userData.email}
                 </Text>
               </View>
             </View>
@@ -80,6 +112,7 @@ function CustomDrawerLayout(props) {
     </DrawerContentScrollView>
     <View style={styles.bottomDrawerSection}>
       <DrawerItem
+        onPress={() => signOut()}
         icon={({color, size}) => (
           <Icon name="exit-to-app" color={color} size={size} />
         )}
