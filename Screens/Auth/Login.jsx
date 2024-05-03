@@ -45,6 +45,8 @@ function LoginPage({navigation}){
             AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
             setEmail('');
             setPassword(''); 
+            // const emailInfo = AsyncStorage.getItem('email')
+            // console.log(emailInfo, 'testining');
             navigation.navigate('DrawerMain');
         }else if(res.data.status === 401) {
             Alert.alert('Login Failed!', 'Invalid email or password');

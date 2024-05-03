@@ -1,7 +1,7 @@
 {
   "expo": {
     "androidStatusBar": {
-      "backgroundColor": "#C2185B",
+      "backgroundColor": "#FFFFFF",
       "translucent": false
     },
     "name": "rma",
