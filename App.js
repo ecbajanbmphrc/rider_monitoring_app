@@ -54,11 +54,14 @@ const CustomDrawerNav = () => {
     <Stack.Screen 
         name="Login"  
         component={LoginPage} 
-        options={{ 
+        options={
+          { 
          contentStyle:{
-         
           animation:'slide_from_right'
-          }}}/>
+           },
+          headerShown:false
+          }
+          }/>
    
    
   </Drawer.Navigator>

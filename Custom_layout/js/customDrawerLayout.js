@@ -1,6 +1,6 @@
 // import * as React from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import { View, Button, Text, StyleSheet } from 'react-native';
+import { View, Button, Text, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {Avatar, Title} from 'react-native-paper';
 import {
@@ -62,19 +62,34 @@ const DrawerItems = props => {
 function CustomDrawerLayout(props) {
   const navigation = useNavigation();
   function signOut(){
-    AsyncStorage.setItem('isLoggedIn','');
-    AsyncStorage.setItem('token','');
-    navigation.navigate('Login');
+
+    Alert.alert('Hold on!', 'Are you sure you want to sign out?', [
+      {
+        text: 'Cancel',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      {text: 'YES', onPress: () => {
+      AsyncStorage.setItem('isLoggedIn','');
+      AsyncStorage.setItem('token','');
+      AsyncStorage.setItem('email','');
+      navigation.navigate('Login');}
+    },
+    ]);
+
+    
   }
 
 
-  const [userData, setUserData] = useState("");
+  const [userData, setUserData] = useState('');
 
   async function getData(){
     const token = await AsyncStorage.getItem('token');
+   
     console.log(token);
     axios.post("http://192.168.50.139:8082/userdata" , {token: token})
     .then(res => {
+    AsyncStorage.setItem('email', res.data.data.email);
     console.log(res.data)
     setUserData(res.data.data)});
   }
