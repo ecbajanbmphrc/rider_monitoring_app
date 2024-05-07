@@ -6,6 +6,7 @@
     },
     "name": "rma",
     "slug": "rma",
+    "scheme": "your-app-scheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/bmp_icon.png",
@@ -29,6 +30,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
