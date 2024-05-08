@@ -13,43 +13,51 @@ function AttendanceScreen() {
   const [timeMonth, setTimeMonth] = useState('');
   const [timeInput, setTimeInput] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [timeIn, setTimeIn] = useState('');
-  const [status, setStatus] = useState(false);
+  const [timeIn, setTimeIn] = useState('-----');
+  const [timeOut, setTimeOut] = useState('-----');
+  const [status, setStatus] = useState('time_in');
   const [test, setTest] = useState('');
 
   const [refresh, setRefresh]  = useState(false); 
 
   async function onRefresh(){
-    const data = await AsyncStorage.getItem('email');
+  
+  const data = await AsyncStorage.getItem('email');
+
+  setUserEmail(data);
   axios.post("http://192.168.50.139:8082/retrieve-user-attendance" , {user: data})
   .then(res => {
  
-  setTimeIn(res.data.data.time)
-  console.log(res.data.data.time);
+  setTimeIn(res.data.data.time_in);
+  setStatus('time_out')
 
-  });
+  if(res.data.data.time_out){
+    setTimeOut(res.data.data.time_out);
+    setStatus('done')
+    console.log("is not null");
+  }else{
+    console.log("is null");
   }
+ 
+  console.log(res.data.data,'testining');
 
-  async function getData(){
-    const data = await AsyncStorage.getItem('email');
-    setUserEmail(data);
-  }
-
-  async function getAttendance(){
+  })
+  .catch(e => {
+    console.log(e)
+    setTimeIn('-----');
+    setTimeOut('-----');
+    setStatus('time_in');
+    })
+  };
 
   
-  }
 
   useEffect(() => { 
-    getData();
-  }, []);
-
-      useEffect(() => { 
-      getAttendance();
+   
+   onRefresh();
   }, []);
 
 
-  
 
   useEffect(() => {
   
@@ -66,13 +74,14 @@ function AttendanceScreen() {
 
   }, [])
 
-  function handleAttendanceSubmit(){
+  function handleAttendanceTimeInSubmit(){
 
     const attendanceData = {
         user: userEmail,
         w_date: currentDateTime.toLocaleString(),
         date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),
-        time: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})
+        time_in: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
+        time_out: ''
     };  
     
     
@@ -83,11 +92,49 @@ function AttendanceScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>  axios
-      .post("http://192.168.50.139:8082/attendance-input", attendanceData)
+      .post("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){
         Alert.alert("Attendance recorded successfully!");
+        onRefresh();
+        setStatus('time_out')
+       }else{    
+        Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
+          {
+              text: 'OK'
+          }
+        ]);
+       }
+       
+
+      })
+      .catch(e => console.log(e))},
+    ]);
+    
+        
+             
+  }
+
+
+  function handleAttendanceTimeOutSubmit(){
+
+    time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
+
+    Alert.alert('Corfirmation:', 'You are about to input your time out!', [
+      {
+        text: 'Cancel',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      {text: 'Confirm', onPress: () =>  axios
+      .put("http://192.168.50.139:8082/attendance-input-time-out", {user: userEmail, time_out : time_out_input })
+      .then(res => {console.log(res.data)
+
+      if(res.data.status == 200){
+        Alert.alert("Attendance recorded successfully!");
+        onRefresh();
+        setStatus('done')
        }else{    
         Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
           {
@@ -109,7 +156,7 @@ function AttendanceScreen() {
     <SafeAreaView style={{flex: 1}}>
      <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
      <View style={{flex:1, marginTop: 35}}>
-      {/* <View style={[cardStyles.card, cardStyles.cardElevated]}> */}
+
       <View style={cardStyles.cardView}>
       <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 40, fontWeight: '800',  color:'#FFFFFF'}}>
 
@@ -131,25 +178,15 @@ function AttendanceScreen() {
         </Text>
       <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 25, fontWeight: '500',  color:'#000000'}}>
 
-        {/* {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})} */}
 
         {timeIn}
 
       </Text>
-      <View style={{marginTop: 10}}>
-       <Text style={{alignSelf: 'center', fontSize:15, fontWeight: '500',  color:'#000000'}}>
-       
-       {/* {currentDateTime.toLocaleString('en-us',{month:'short', day:'numeric' ,year:'numeric', getDay:'number', weekday:'short' })} */}
-
-      </Text>
-
-       
-       </View> 
 
        <View style={{marginTop:20,flexDirection: 'row', alignItems: 'center'}}>
         <View style={{flex: 1, height: 1, backgroundColor: 'black'}} />
        <View>
-        {/* <Text style={{width: 50, textAlign: 'center'}}>Hello</Text> */}
+
       </View >
         <View style={{flex: 1, height: 1, backgroundColor: 'black'}} />
       </View>
@@ -160,18 +197,10 @@ function AttendanceScreen() {
 
        <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 25, fontWeight: '600',  color:'#000000'}}>
 
-      {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})}
+       {timeOut}
 
       </Text>
-      <View style={{marginTop: 10}}>
-      <Text style={{alignSelf: 'center', fontSize:15, fontWeight: '500',  color:'#000000'}}>
-
-        {currentDateTime.toLocaleString('en-us',{month:'short', day:'numeric' ,year:'numeric', getDay:'number', weekday:'short' })}
-
-      </Text>
-      
-
-      </View>
+     
 
 
       </View>  
@@ -180,18 +209,42 @@ function AttendanceScreen() {
      </View>
 
      </ScrollView>
-     <View style={styles.button}>
-                    <TouchableOpacity 
-                     style={styles.loginButton}
-                     onPress={() => handleAttendanceSubmit()}
-                    >
-                        <View>
-                            <Text style={styles.textSign}>
-                                Time In
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-       </View>
+
+  {status === "time_in" &&(
+      <View style={styles.button}>
+      <TouchableOpacity 
+       style={styles.loginButton}
+       onPress={() => handleAttendanceTimeInSubmit() }
+      >
+          <View>
+              <Text style={styles.textSign}>
+                  Time In
+              </Text>
+          </View>
+      </TouchableOpacity>
+      </View>
+  )
+  }
+
+  {status === "time_out" &&(
+
+   <View style={styles.button}>
+    <TouchableOpacity   
+      style={styles.loginButton}
+      onPress={() => handleAttendanceTimeOutSubmit() }
+    >
+     <View>
+        <Text style={styles.textSign}>
+            Time Out
+        </Text>
+     </View>
+    </TouchableOpacity>
+  </View>
+
+
+  )
+  }
+
        
     </SafeAreaView>
     );
