@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 const {Text, StyleSheet, View, SafeAreaView, Dimensions, TouchableOpacity} = require('react-native');
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 function AttendanceScreen() {
 
   
@@ -12,14 +13,43 @@ function AttendanceScreen() {
   const [timeMonth, setTimeMonth] = useState('');
   const [timeInput, setTimeInput] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [timeIn, setTimeIn] = useState('');
+  const [status, setStatus] = useState(false);
+  const [test, setTest] = useState('');
+
+  const [refresh, setRefresh]  = useState(false); 
+
+  async function onRefresh(){
+    const data = await AsyncStorage.getItem('email');
+  axios.post("http://192.168.50.139:8082/retrieve-user-attendance" , {user: data})
+  .then(res => {
+ 
+  setTimeIn(res.data.data.time)
+  console.log(res.data.data.time);
+
+  });
+  }
 
   async function getData(){
     const data = await AsyncStorage.getItem('email');
     setUserEmail(data);
   }
+
+  async function getAttendance(){
+
+  
+  }
+
   useEffect(() => { 
     getData();
   }, []);
+
+      useEffect(() => { 
+      getAttendance();
+  }, []);
+
+
+  
 
   useEffect(() => {
   
@@ -40,7 +70,9 @@ function AttendanceScreen() {
 
     const attendanceData = {
         user: userEmail,
-        date: currentDateTime.toLocaleString(),
+        w_date: currentDateTime.toLocaleString(),
+        date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),
+        time: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})
     };  
     
     
@@ -75,6 +107,7 @@ function AttendanceScreen() {
 
     return (
     <SafeAreaView style={{flex: 1}}>
+     <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
      <View style={{flex:1, marginTop: 35}}>
       {/* <View style={[cardStyles.card, cardStyles.cardElevated]}> */}
       <View style={cardStyles.cardView}>
@@ -98,13 +131,15 @@ function AttendanceScreen() {
         </Text>
       <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 25, fontWeight: '500',  color:'#000000'}}>
 
-        {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})}
+        {/* {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})} */}
+
+        {timeIn}
 
       </Text>
       <View style={{marginTop: 10}}>
        <Text style={{alignSelf: 'center', fontSize:15, fontWeight: '500',  color:'#000000'}}>
        
-       {currentDateTime.toLocaleString('en-us',{month:'short', day:'numeric' ,year:'numeric', getDay:'number', weekday:'short' })}
+       {/* {currentDateTime.toLocaleString('en-us',{month:'short', day:'numeric' ,year:'numeric', getDay:'number', weekday:'short' })} */}
 
       </Text>
 
@@ -144,7 +179,7 @@ function AttendanceScreen() {
      
      </View>
 
-
+     </ScrollView>
      <View style={styles.button}>
                     <TouchableOpacity 
                      style={styles.loginButton}
@@ -157,6 +192,7 @@ function AttendanceScreen() {
                         </View>
                     </TouchableOpacity>
        </View>
+       
     </SafeAreaView>
     );
 
