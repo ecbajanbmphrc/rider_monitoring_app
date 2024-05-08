@@ -37,15 +37,22 @@ export default function CustomDrawerContent(props){
 
     async function getData(){
     const token = await AsyncStorage.getItem('token');
+
+    let userEmail
    
    
     console.log(token);
-    axios.post("http://192.168.50.139:8082/userdata" , {token: token})
+    await axios.post("http://192.168.50.139:8082/userdata" , {token: token})
     .then(res => {
     AsyncStorage.setItem('email', res.data.data.email);
-    setUserData(res.data.data)});
-    }
-        useEffect(() => { 
+    setUserData(res.data.data)
+    userEmail = res.data.data.email  
+
+    });
+
+   }
+    
+    useEffect(() => { 
         getData();
     }, []);
 
