@@ -35,7 +35,8 @@
     "react-native-svg": "^15.1.0",
     "expo-router": "~3.4.10",
     "expo-linking": "~6.2.2",
-    "expo-constants": "~15.4.6"
+    "expo-constants": "~15.4.6",
+    "expo-location": "~16.5.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
