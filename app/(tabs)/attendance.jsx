@@ -1,22 +1,28 @@
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 const { Alert} = require('react-native');
 import React, { useState, useEffect } from 'react';
 const {Text, StyleSheet, View, SafeAreaView, Dimensions, TouchableOpacity} = require('react-native');
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import * as Location from 'expo-location';
+
+
+
 function AttendanceScreen() {
 
   
 
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  const [timeSeconds, setTimeSeconds] = useState('');
-  const [timeMonth, setTimeMonth] = useState('');
-  const [timeInput, setTimeInput] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [timeIn, setTimeIn] = useState('-----');
   const [timeOut, setTimeOut] = useState('-----');
   const [status, setStatus] = useState('time_in');
+
   const [test, setTest] = useState('');
+  const [longitude , setLongitude] = useState('');
+  const [latitude , setLatitude] = useState('');
 
   const [refresh, setRefresh]  = useState(false); 
 
@@ -50,12 +56,16 @@ function AttendanceScreen() {
     })
   };
 
+
   
 
-  useEffect(() => { 
-   
-   onRefresh();
-  }, []);
+  
+
+  useFocusEffect(
+    useCallback(() => {
+     onRefresh();
+    }, [])
+  );
 
 
 
@@ -64,26 +74,42 @@ function AttendanceScreen() {
   const timer = setInterval (() => {{
     setCurrentDateTime(new Date())
     }
-    {
-    setTimeMonth(new Date().getDay())
-    }
+    
    }
     ,1000)
 
+  
   return()=> clearInterval(timer)
+ 
 
   }, [])
 
-  function handleAttendanceTimeInSubmit(){
+  async function handleAttendanceTimeInSubmit(){
+    const data = await AsyncStorage.getItem('email');
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+      if(status !== 'granted'){
+          console.log("Please grant location permissions");
+          return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+    
+
 
     const attendanceData = {
         user: userEmail,
         w_date: currentDateTime.toLocaleString(),
         date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),
         time_in: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
+        time_in_latitude: currentLocation.coords.latitude,
+        time_in_longitude: currentLocation.coords.longitude,
+        time_out_latitude: '',
+        time_out_longitude: '',
         time_out: ''
     };  
-    
+  
+    console.log(currentLocation.coords.latitude);
     
     Alert.alert('Corfirmation:', 'You are about to input your time in!', [
       {
@@ -91,9 +117,13 @@ function AttendanceScreen() {
         onPress: () => null,
         style: 'cancel',
       },
-      {text: 'Confirm', onPress: () =>  axios
+      {text: 'Confirm', onPress: () =>
+        
+          
+      axios
       .post("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
+        console.log('your longitude is',longitude);
 
       if(res.data.status == 200){
         Alert.alert("Attendance recorded successfully!");
@@ -109,7 +139,9 @@ function AttendanceScreen() {
        
 
       })
-      .catch(e => console.log(e))},
+      .catch(e => console.log(e))
+  
+    },
     ]);
     
         
@@ -117,7 +149,18 @@ function AttendanceScreen() {
   }
 
 
-  function handleAttendanceTimeOutSubmit(){
+  async function handleAttendanceTimeOutSubmit(){
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if(status !== 'granted'){
+        console.log("Please grant location permissions");
+        return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+
+    let timeoutLatitude = currentLocation.coords.latitude;
+    let timeoutLongitude = currentLocation.coords.longitude;
 
     time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
 
@@ -128,7 +171,7 @@ function AttendanceScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>  axios
-      .put("http://192.168.50.139:8082/attendance-input-time-out", {user: userEmail, time_out : time_out_input })
+      .put("http://192.168.50.139:8082/attendance-input-time-out", {user: userEmail, time_out : time_out_input, time_out_latitude : timeoutLatitude, time_out_longitude : timeoutLongitude })
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){
