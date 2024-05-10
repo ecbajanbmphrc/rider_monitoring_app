@@ -23,6 +23,8 @@ function AttendanceScreen() {
   const [test, setTest] = useState('');
   const [longitude , setLongitude] = useState('');
   const [latitude , setLatitude] = useState('');
+  const [timeInAddress, setTimeInAddress] = useState('');
+  const [timeOutAddress, setTimeOutAddress] = useState('');
 
   const [refresh, setRefresh]  = useState(false); 
 
@@ -32,13 +34,26 @@ function AttendanceScreen() {
 
   setUserEmail(data);
   axios.post("http://192.168.50.139:8082/retrieve-user-attendance" , {user: data})
-  .then(res => {
- 
+  .then(
+  
+  async res => {
+
+  const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_latitude) , "longitude" : parseFloat(res.data.data.time_in_longitude)});
+   
+  const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+
   setTimeIn(res.data.data.time_in);
+  setTimeInAddress(time_in_city_and_street);
   setStatus('time_out')
 
   if(res.data.data.time_out){
     setTimeOut(res.data.data.time_out);
+    const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_latitude) , "longitude" : parseFloat(res.data.data.time_out_longitude)});
+    
+    const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
+    
+    setTimeOutAddress(time_out_city_and_street);
+
     setStatus('done')
     console.log("is not null");
   }else{
@@ -52,6 +67,8 @@ function AttendanceScreen() {
     console.log(e)
     setTimeIn('-----');
     setTimeOut('-----');
+    setTimeInAddress('');
+    setTimeOutAddress('');
     setStatus('time_in');
     })
   };
@@ -223,6 +240,15 @@ function AttendanceScreen() {
 
 
         {timeIn}
+        
+
+      </Text>
+
+      <Text style={{marginTop: 5, alignSelf: 'center', fontSize: 20, fontWeight: '500',  color:'#000000'}}>
+
+
+        {timeInAddress}
+        
 
       </Text>
 
@@ -244,6 +270,13 @@ function AttendanceScreen() {
 
       </Text>
      
+      <Text style={{marginTop: 5, alignSelf: 'center', fontSize: 20, fontWeight: '500',  color:'#000000'}}>
+
+
+        {timeOutAddress}
+        
+
+      </Text>
 
 
       </View>  
