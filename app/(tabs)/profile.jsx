@@ -21,9 +21,13 @@ function ProfileScreen() {
       }
 
       let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation.coords.longitude);
+      let address = await Location.reverseGeocodeAsync({"latitude" : 50 , "longitude" : 50});
+
+     
+
+      // setLocation(address[0]);
       console.log("Location");
-      console.log(currentLocation.coords.latitude);
+      console.log(address);
     }
     getPermissions();
   }, []);
