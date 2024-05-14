@@ -47,7 +47,7 @@ function RegisterPage({props}){
             if(password !== confirmPassword)  return  Alert.alert('Password does not match')
             
             axios
-            .post("http://192.168.50.139:8082/register", userData)
+            .post("http://192.168.1.167:8082/register", userData)
             .then(res => {console.log(res.data)
 
             if(res.data.status == 200){

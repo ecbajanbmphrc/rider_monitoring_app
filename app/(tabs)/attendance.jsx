@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
+// import {ENV} from '../../env';
 
 
 
@@ -32,13 +33,13 @@ function AttendanceScreen() {
   
   const data = await AsyncStorage.getItem('email');
 
-  setUserEmail(data);
-  axios.post("http://192.168.50.139:8082/retrieve-user-attendance" , {user: data})
-  .then(
-  
-  async res => {
 
-  const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_latitude) , "longitude" : parseFloat(res.data.data.time_in_longitude)});
+  setUserEmail(data);
+  axios.get( "http://192.168.50.139:8082/retrieve-user-attendance" ,  {params: {user: data}})
+  .then(
+
+  async res => {
+  const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
    
   const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
 
@@ -48,7 +49,7 @@ function AttendanceScreen() {
 
   if(res.data.data.time_out){
     setTimeOut(res.data.data.time_out);
-    const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_latitude) , "longitude" : parseFloat(res.data.data.time_out_longitude)});
+    const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
     
     const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
     
@@ -119,11 +120,16 @@ function AttendanceScreen() {
         w_date: currentDateTime.toLocaleString(),
         date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),
         time_in: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
-        time_in_latitude: currentLocation.coords.latitude,
-        time_in_longitude: currentLocation.coords.longitude,
-        time_out_latitude: '',
-        time_out_longitude: '',
-        time_out: ''
+        time_in_coordinates: {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude
+        },
+        time_out: '',
+        time_out_coordinates: {
+          latitude: '',
+          longitude: ''
+        }
+       
     };  
   
     console.log(currentLocation.coords.latitude);
@@ -138,7 +144,7 @@ function AttendanceScreen() {
         
           
       axios
-      .post("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
+      .put("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
         console.log('your longitude is',longitude);
 
@@ -179,7 +185,17 @@ function AttendanceScreen() {
     let timeoutLatitude = currentLocation.coords.latitude;
     let timeoutLongitude = currentLocation.coords.longitude;
 
-    time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
+    time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})
+
+    const attendanceData = {
+      user: userEmail, 
+      time_out : time_out_input, 
+      time_out_coordinates : {
+        latitude: timeoutLatitude,
+        longitude : timeoutLongitude
+      }
+
+    }
 
     Alert.alert('Corfirmation:', 'You are about to input your time out!', [
       {
@@ -188,7 +204,7 @@ function AttendanceScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>  axios
-      .put("http://192.168.50.139:8082/attendance-input-time-out", {user: userEmail, time_out : time_out_input, time_out_latitude : timeoutLatitude, time_out_longitude : timeoutLongitude })
+      .put("http://192.168.50.139:8082/attendance-input-time-out", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){
@@ -369,33 +385,6 @@ const styles = StyleSheet.create({
 
 });
 
-// const cardStyles = StyleSheet.create({
-//   headerText: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     paddingHorizontal: 80,
-//     paddingVertical: 80
-//   },
-//   card: {
-//     width: 380,
-//     height: 120,
-//     borderRadius: 15,
-//     marginVertical: 5,
-//     marginHorizontal: 16
-//   },
-//   cardElevated: {
-//     backgroundColor: '#FFFFFF',
-//     color: '#000000'
-//   },
-//   cardImage:{
-//     height: 180
-//   },
-//   cardBody: {},
-//   cardTitle: {},
-//   cardLabel: {},
-//   cardDescription: {},
-//   cardFooter: {}
-// });  
 
 const cardStyles = StyleSheet.create({
   text:{

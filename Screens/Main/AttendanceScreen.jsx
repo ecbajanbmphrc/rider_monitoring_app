@@ -55,7 +55,7 @@ function AttendanceScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>  axios
-      .post("http://192.168.50.139:8082/attendance-input", attendanceData)
+      .post("http://192.168.1.167:8082/attendance-input", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){
