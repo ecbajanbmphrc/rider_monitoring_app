@@ -15,7 +15,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 
+
 function LoginPage({navigation}){
+    
+    
 
     const [showPassword, setShowPassword] = useState(true);
     const [email, setEmail] = useState('');
@@ -24,6 +27,7 @@ function LoginPage({navigation}){
     const [passwordVerify, setPasswordVerify] = useState(false);
 
     const router = useRouter();
+   
     
 
 
@@ -38,7 +42,7 @@ function LoginPage({navigation}){
       if(!passwordVerify) return Alert.alert('Please input your password!');
         axios.post("http://192.168.50.139:8082/login-user", userData)
         .then(
-        res => {console.log(res.data)
+        res => {
         if(res.data.status === 200){
             Alert.alert('Login Successful');
             AsyncStorage.setItem('token', res.data.data);
@@ -83,12 +87,12 @@ function LoginPage({navigation}){
      style={{backgroundColor: 'white'}}>
     
         <View>
+          
             <View style={styles.logoContainer}>
                 <Image style={styles.logo} source = {require('../../assets/bmp.png')}/>
             </View>
             <View style={styles.loginContainer}>
                 <Text style={styles.text_header}>Login</Text>
-
                 <View style= {styles.action}>
                     <FontAwesome name="envelope" color="#420475" style={styles.emailIcon}/>
                     <TextInput 

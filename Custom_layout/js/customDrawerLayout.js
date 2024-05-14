@@ -87,7 +87,7 @@ function CustomDrawerLayout(props) {
     const token = await AsyncStorage.getItem('token');
    
     console.log(token);
-    axios.post("http://192.168.50.139:8082/userdata" , {token: token})
+    axios.post("http://192.168.1.167:8082/userdata" , {token: token})
     .then(res => {
     AsyncStorage.setItem('email', res.data.data.email);
     console.log(res.data)

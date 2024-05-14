@@ -6,14 +6,14 @@ import {Avatar, Icon, Title} from 'react-native-paper';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { iconName } from "@fortawesome/free-solid-svg-icons/fa0";
-import { Feather } from '@expo/vector-icons/';
+
 
 
 
 export default function CustomDrawerContent(props){
         
     const router = useRouter();
+    
     const { top, bottom } = useSafeAreaInsets();
 
     const [userData, setUserData] = useState('');
@@ -42,10 +42,10 @@ export default function CustomDrawerContent(props){
    
    
     console.log(token);
-    await axios.post("http://192.168.50.139:8082/userdata" , {token: token})
+    await axios.post("http://192.168.50.139:8082/user-data" ,{token: token})
     .then(res => {
     AsyncStorage.setItem('email', res.data.data.email);
-    setUserData(res.data.data)
+    setUserData(res.data.data);
     userEmail = res.data.data.email  
 
     });
@@ -86,6 +86,7 @@ export default function CustomDrawerContent(props){
               </Title>
                 <Text style={styles.caption} numberOfLines={1}>
                 {userData.email}
+            
             
                 </Text>
               </View>

@@ -31,6 +31,8 @@ function RegisterPage({props}){
     const toggleCheckbox = () => setChecked(!checked);
     const router = useRouter();
 
+  
+
     function handleSubmit(){
 
         const userData = {
@@ -47,7 +49,7 @@ function RegisterPage({props}){
             if(password !== confirmPassword)  return  Alert.alert('Password does not match')
             
             axios
-            .post("http://192.168.50.139:8082/register", userData)
+            .post("http://192.168.50.139:8082/register-user-detail", userData)
             .then(res => {console.log(res.data)
 
             if(res.data.status == 200){
