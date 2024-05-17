@@ -47,10 +47,11 @@ function LoginPage({navigation}){
             Alert.alert('Login Successful');
             AsyncStorage.setItem('token', res.data.data);
             AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+            AsyncStorage.setItem('email', res.data.email);
+            AsyncStorage.setItem('last_name', res.data.last_name);
             setEmail('');
             setPassword(''); 
-            // const emailInfo = AsyncStorage.getItem('email')
-            // console.log(emailInfo, 'testining');
+            // console.log(res.data);
             router.replace('/(tabs)/dashboard');
           
         }else if(res.data.status === 401) {
