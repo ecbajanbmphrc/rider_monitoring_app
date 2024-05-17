@@ -73,6 +73,7 @@ function CustomDrawerLayout(props) {
       AsyncStorage.setItem('isLoggedIn','');
       AsyncStorage.setItem('token','');
       AsyncStorage.setItem('email','');
+      AsyncStorage.setItem('last_name','');
       navigation.navigate('Login');}
     },
     ]);
@@ -81,17 +82,17 @@ function CustomDrawerLayout(props) {
   }
 
 
-  const [userData, setUserData] = useState('');
+  const [userEmailData, setUserEmailData] = useState('');
+  const [userLastNameData, setUserLastNameData] = useState('');
 
   async function getData(){
     const token = await AsyncStorage.getItem('token');
-   
-    console.log(token);
-    axios.post("http://192.168.1.167:8082/userdata" , {token: token})
-    .then(res => {
-    AsyncStorage.setItem('email', res.data.data.email);
-    console.log(res.data)
-    setUserData(res.data.data)});
+    const email = await AsyncStorage.getItem('email');
+    const lastName = await AsyncStorage.getItem('last_name');
+
+    setUserEmailData(email);
+    setUserLastNameData(lastName);
+
   }
   useEffect(() => { 
     getData();
@@ -112,9 +113,9 @@ function CustomDrawerLayout(props) {
                 style={{marginTop: 5, backgroundColor: '#FFF7F1'}}
               />
               <View style={{marginLeft: 10, flexDirection: 'column'}}>
-                <Title style={styles.title}> {userData.first_name}</Title>
+                <Title style={styles.title}> {userLastNameData}</Title>
                 <Text style={styles.caption} numberOfLines={1}>
-                 {userData.email}
+                 {userEmailData}
                 </Text>
               </View>
             </View>
