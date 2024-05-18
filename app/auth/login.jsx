@@ -40,7 +40,7 @@ function LoginPage({navigation}){
         }
       if(!emailVerify) return Alert.alert('Please input your email!');
       if(!passwordVerify) return Alert.alert('Please input your password!');
-        axios.post("http://192.168.50.139:8082/login-user", userData)
+        axios.post("http://rider-monitoring-app-backend.onrender.com/login-user", userData)
         .then(
         res => {
         if(res.data.status === 200){
