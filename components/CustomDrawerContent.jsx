@@ -16,7 +16,9 @@ export default function CustomDrawerContent(props){
     
     const { top, bottom } = useSafeAreaInsets();
 
-    const [userData, setUserData] = useState('');
+
+    const [userEmailData, setUserEmailData] = useState('');
+    const [userLastNameData, setUserLastNameData] = useState('');
 
     function signOut(){
 
@@ -30,6 +32,7 @@ export default function CustomDrawerContent(props){
           AsyncStorage.setItem('isLoggedIn','');
           AsyncStorage.setItem('token','');
           AsyncStorage.setItem('email','');
+          AsyncStorage.setItem('last_name','');
           router.replace('/auth/login');}
         },
         ]);
@@ -38,17 +41,12 @@ export default function CustomDrawerContent(props){
     async function getData(){
     const token = await AsyncStorage.getItem('token');
 
-    let userEmail
-   
-   
-    console.log(token);
-    await axios.post("http://192.168.50.139:8082/user-data" ,{token: token})
-    .then(res => {
-    AsyncStorage.setItem('email', res.data.data.email);
-    setUserData(res.data.data);
-    userEmail = res.data.data.email  
+    const email = await AsyncStorage.getItem('email');
+    const lastName = await AsyncStorage.getItem('last_name');
 
-    });
+    setUserEmailData(email);
+    setUserLastNameData(lastName);
+
 
    }
     
@@ -61,16 +59,11 @@ export default function CustomDrawerContent(props){
         <DrawerContentScrollView 
         {...props}
          contentContainerStyle={{
-            // backgroundColor: '#dde3f3'
+      
             paddingTop: top
         }}
         >
-        {/* <View style={{}}>
-            <Image
-             source={{ uri: 'https://galaxies.dev/img/authors/simong.webp'}}
-             style={{ width: 100, height: 100, alignSelf: 'center'}}
-             />
-        </View> */}
+   
         <View style={styles.userInfoSection}>
             <View style={{flexDirection: 'row', marginTop: 15, marginBottom: 10}}>
               <Avatar.Image
@@ -82,10 +75,10 @@ export default function CustomDrawerContent(props){
               />
               <View style={{marginLeft: 10, flexDirection: 'column'}}>
               <Title style={styles.title}> 
-                {userData.last_name}
+                {userLastNameData}
               </Title>
                 <Text style={styles.caption} numberOfLines={1}>
-                {userData.email}
+                {userEmailData}
             
             
                 </Text>
@@ -96,41 +89,15 @@ export default function CustomDrawerContent(props){
         
         </DrawerContentScrollView>
 
-        {/* <Drawer.Screen
-             name="parcel"
-             options={{
-                drawerLabel: 'Parcel',
-                headerTitle: 'Parcel',
-                drawerIcon: ({ size = 100, color }) => (
-                    <Icon name='home-outline' size={20}/>
-                ),
-             }}
-             />  */}
-        
-        {/* <View
-         style={{
-            borderTopColor: '#dde3fe',
-            borderTopWidth: 1,
-            padding: 20,
-            paddingBottom: 20 + bottom,
-         }}>
-         <TouchableOpacity>
-         <Text>Footer</Text>
-        </TouchableOpacity>   
-            
-            
-        </View> */}
+      
          <View
          style={{
             borderTopColor: '#CDE8E5',
             borderTopWidth: 1,
-            // padding: 10,
-            // paddingBottom: 30 + bottom,
          }}>
          <DrawerItem 
          label={"Logout"} onPress={() =>signOut()}
-        //     icon={() => <Icon name="ios-home" size={24} 
-        //     />}
+
         icon={() => <Icon color={'black'} size={20} source="logout" />}
        
 
@@ -157,7 +124,7 @@ const styles = StyleSheet.create({
     caption: {
       fontSize: 13,
       lineHeight: 14,
-      // color: '#6e6e6e',
+
       width: '100%',
     },
     row: {
@@ -168,7 +135,7 @@ const styles = StyleSheet.create({
     section: {
       flexDirection: 'row',
       alignItems: 'center',
-      // marginRight: 15,
+
     },
     paragraph: {
       fontWeight: 'bold',
