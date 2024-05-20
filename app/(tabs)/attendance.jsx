@@ -35,7 +35,7 @@ function AttendanceScreen() {
 
 
   setUserEmail(data);
-  axios.get( "http://192.168.50.139:8082/retrieve-user-attendance" ,  {params: {user: data}})
+  axios.get( "https://rider-monitoring-app-backend.onrender.com/retrieve-user-attendance" ,  {params: {user: data}})
   .then(
 
   async res => {
@@ -144,7 +144,7 @@ function AttendanceScreen() {
         
           
       axios
-      .put("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
+      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
         console.log('your longitude is',longitude);
 
@@ -204,7 +204,7 @@ function AttendanceScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>  axios
-      .put("http://192.168.50.139:8082/attendance-input-time-out", attendanceData)
+      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-out", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){

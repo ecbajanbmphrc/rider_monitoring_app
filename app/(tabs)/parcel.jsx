@@ -98,7 +98,7 @@ function ParcelScreen() {
         
           
       axios
-      .put("http://192.168.50.139:8082/parcel-input", parcelData)
+      .put("https://rider-monitoring-app-backend.onrender.com/parcel-input", parcelData)
       .then(res => {console.log(res.data)
        
 
@@ -130,7 +130,7 @@ function ParcelScreen() {
 
     const email = await AsyncStorage.getItem('email');
 
-    axios.post("http://192.168.50.139:8082/retrieve-parcel-input", {user: email})
+    axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
     .then(
       async res => {
         setRetrieveData( res.data.data[0].parcel);

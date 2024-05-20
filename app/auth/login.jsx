@@ -13,6 +13,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { err } from 'react-native-svg';
 
 
 
@@ -40,7 +41,7 @@ function LoginPage({navigation}){
         }
       if(!emailVerify) return Alert.alert('Please input your email!');
       if(!passwordVerify) return Alert.alert('Please input your password!');
-        axios.post("http://rider-monitoring-app-backend.onrender.com/login-user", userData)
+        axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
         .then(
         res => {
         if(res.data.status === 200){
@@ -51,13 +52,16 @@ function LoginPage({navigation}){
             AsyncStorage.setItem('last_name', res.data.last_name);
             setEmail('');
             setPassword(''); 
-            // console.log(res.data);
             router.replace('/(tabs)/dashboard');
           
         }else if(res.data.status === 401) {
             Alert.alert('Login Failed!', 'Invalid email or password');
              }
-        });
+        }).catch(error =>{
+           console.log(error);
+           Alert.alert(error);
+         
+        } );
     
     }
 

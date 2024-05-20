@@ -60,7 +60,7 @@ const DrawerLayout = () => {
                     <Icon name='inbox' size={20}/>
                 ),
              }}
-             /> 
+             />
          </Drawer>
        </GestureHandlerRootView>
        
