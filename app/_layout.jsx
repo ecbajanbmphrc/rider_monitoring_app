@@ -14,8 +14,9 @@ const Layout = () => {
      }}
     />
     <Stack.Screen name="auth/register" options={{
-        title: 'Register',
-        headerShown: true
+        title: 'Register Account',
+        headerShown: true,
+        headerTitleAlign: 'center'
         
      }}
     />
