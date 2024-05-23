@@ -41,7 +41,7 @@ function LoginPage({navigation}){
         }
       if(!emailVerify) return Alert.alert('Please input your email!');
       if(!passwordVerify) return Alert.alert('Please input your password!');
-        axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
+        axios.post("http://192.168.50.139:8082/login-user", userData)
         .then(
         res => {
         if(res.data.status === 200){
@@ -55,7 +55,7 @@ function LoginPage({navigation}){
             router.replace('/(tabs)/dashboard');
           
         }else if(res.data.status === 401) {
-            Alert.alert('Login Failed!', 'Invalid email or password');
+            Alert.alert('Login Failed!', res.data.data);
              }
         }).catch(error =>{
            console.log(error);
