@@ -150,7 +150,9 @@ function LoginPage({navigation}){
                         marginRight: 10,
                     }}>
 
-                    <Text style={{color: '#420475', fontWeight: '700'}}>
+                    <Text style={{color: '#420475', fontWeight: '700'}} onPress={() => {
+                            router.push({pathname: 'auth/forgotPassword'});
+                        }}>
                         Forgot Password?
                     </Text>
                 </View>
@@ -169,7 +171,7 @@ function LoginPage({navigation}){
                 <View style={styles.button}>
                     <TouchableOpacity style={styles.registerButton}
                         onPress={() => {
-                            router.push('auth/register');
+                            router.push({pathname: 'auth/register'});
                         }}>
                         <View>
                             <Text style={styles.registerTextSign}>
