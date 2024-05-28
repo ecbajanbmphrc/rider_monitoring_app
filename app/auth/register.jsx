@@ -5,11 +5,13 @@ import { useState } from 'react';
 import { CheckBox } from '@rneui/themed';
 import * as React from "react";
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import { useRouter} from 'expo-router';
 
 
 function RegisterPage({props}){
 
+
+ 
     const [firstName, setFirstName] = useState('');
     const [firstNameVerify, setFirstNameVerify] = useState(false);
     const [middleName, setMiddleName] = useState('');
@@ -47,14 +49,22 @@ function RegisterPage({props}){
        
         if(firstNameVerify && lastNameVerify && emailVerify && addressVerify && passwordVerify && phoneVerify && confirmPasswordVerify){
             if(password !== confirmPassword)  return  Alert.alert('Password does not match')
-            
+
             axios
-            .post("http://192.168.50.139:8082/register-user-detail", userData)
-            .then(res => {console.log(res.data)
+            .post("http://192.168.50.139:8082/send-otp-register", userData)
+            .then(res => {
 
             if(res.data.status == 200){
-              Alert.alert("Registered Successfully!");
-              router.replace('auth/login');
+                console.log(userData, "test data");
+           
+             router.push({pathname: 'auth/registerOtp', params: {email: res.data.email, otpCode: res.data.code, 
+                first_name: firstName,
+                middle_name: middleName,
+                last_name: lastName,
+                email: email,
+                phone: phone,
+                address: address,
+                password: password,} });
              }else{    
               Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
                 {
@@ -62,10 +72,28 @@ function RegisterPage({props}){
                 }
               ]);
              }
+            })
+            .catch(e => console.log(e)); 
+             
+            
+            // axios
+            // .post("http://192.168.50.139:8082/register-user-detail", userData)
+             // .then(res => {console.log(res.data)
+
+            // if(res.data.status == 200){
+            //   Alert.alert("Registered Successfully!");
+            //   router.replace('auth/login');
+            //  }else{    
+            //   Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
+            //     {
+            //         text: 'OK'
+            //     }
+            //   ]);
+            //  }
              
 
-            })
-            .catch(e => console.log(e));
+            // })
+            // .catch(e => console.log(e));
             
         }
         else{
@@ -171,8 +199,10 @@ function RegisterPage({props}){
         <View>
            
             <View style={styles.loginContainer}>
-              
-
+              <Text>
+             
+              </Text>
+                
                 <View style = {styles.textInputRegistration}>
                     <TextInput 
                     autoCapitalize={"words"}
@@ -405,28 +435,10 @@ function RegisterPage({props}){
                     onChange={e => handleConfirmPassword(e)}
                     secureTextEntry={!showPassword}
                     theme={{ roundness: 8 }}
-                    // right= { confirmPassword.length < 1 ? null : confirmPasswordVerify ? (
-                    //     <TextInput.Icon 
-                    //     color="green"
-                    //     icon="check" />
-                    // ) : (
-                    //     <TextInput.Icon 
-                    //     color="red"
-                    //     icon="exclamation" />
-                    // )} 
                        
                     />                         
                 </View>
-{/*                
-                {confirmPassword.length < 1 ? null :  confirmPasswordVerify ? null : (
-                        <Text
-                            style={{
-                                marginLeft:20,
-                                color:'red',
-                        }}>
-                            Password does not match!
-                        </Text>
-                )} */}
+
     
                 <View 
                     style = {{marginStart:-10, marginTop:-5}}>
@@ -446,7 +458,10 @@ function RegisterPage({props}){
                 <View style={styles.button}>
                     <TouchableOpacity 
                     style={styles.loginButton}
-                    onPress={() => handleSubmit()}>
+                    onPress={() => {
+                        // router.push({pathname: 'auth/registerOtp'});
+                        handleSubmit()
+                    }}>
                         <View>
                             <Text style={styles.textSign}>
                                 Register
