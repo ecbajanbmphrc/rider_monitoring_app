@@ -3,6 +3,7 @@ const {Text, StyleSheet, View, TouchableOpacity, Alert, ScrollView } = require('
 import { TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 
@@ -12,6 +13,7 @@ function ForgotPasswordScreen({navigation}) {
     const [email, setEmail] = useState('');
     const [emailVerify, setEmailVerify] = useState(false);
     const router = useRouter();
+    const [progressVisible, setProgressVisible] = useState(false);
 
     function handleEmail(e){
       const emailVar = e.nativeEvent.text;
@@ -29,15 +31,17 @@ function ForgotPasswordScreen({navigation}) {
 
       if(!emailVerify) return Alert.alert('Unable to proceed', 'Please enter your email first!');
 
+           setProgressVisible(true);
            axios
-            .post("http://192.168.50.139:8082/send-otp-forgot-password", userData)
+            .post("https://rider-monitoring-app-backend.onrender.com/send-otp-forgot-password", userData)
             .then(res => {
 
             if(res.data.status == 200){
                 console.log(res.data);
-           
+                setProgressVisible(false);
                 router.push({pathname: 'auth/forgotPasswordOtp', params : {email: email, otpCode: res.data.code}});
-             }else{    
+             }else{
+              setProgressVisible(false);    
               Alert.alert("Unable to proceed",JSON.stringify(res.data.data), [
                 {
                     text: 'OK'
@@ -45,7 +49,7 @@ function ForgotPasswordScreen({navigation}) {
               ]);
              }
             })
-            .catch(e => {{console.log(e), Alert.alert('Error', e)}}); 
+            .catch(e => {{console.log(e), setProgressVisible(true),Alert.alert('Error', e)}}); 
       
     }
 
@@ -54,6 +58,11 @@ function ForgotPasswordScreen({navigation}) {
          showsVerticalScrollIndicator={false}
          style={{backgroundColor: 'white'}}>    
          <View style={styles.forgotPasswordContainer}>
+          <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+          />
           <View style = {styles.textInputEmail}>
                     <TextInput 
                     mode="outlined"

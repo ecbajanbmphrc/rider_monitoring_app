@@ -12,6 +12,7 @@ import axios from 'axios';
 import { Card } from 'react-native-paper';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 function ParcelScreen() {
@@ -31,6 +32,7 @@ function ParcelScreen() {
     {label: 'Bulk', value: 'Bulk'}
   ]);
   const [selectType , setSelectType] = useState('');
+  const [progressVisible, setProgressVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,8 +48,16 @@ function ParcelScreen() {
     return(
        
       <Card style = {{ padding: 16, margin: 10}}>
+        
+        
+
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
 
+        <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+        />
 
         {item.parcel_type === 'Bulk' && (
             <Icon name='package-variant-closed' size={30} color="#000000"/>  
@@ -95,19 +105,21 @@ function ParcelScreen() {
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>
-        
-          
+      {
+      setProgressVisible(true)    
       axios
-      .put("http://192.168.50.139:8082/parcel-input", parcelData)
+      .put("https://rider-monitoring-app-backend.onrender.com/parcel-input", parcelData)
       .then(res => {console.log(res.data)
        
 
       if(res.data.status == 200){
+        setProgressVisible(false)    
         Alert.alert("Parcel recorded successfully!");
         retrieveParcelData()
         bottomSheetModalRef.current?.close()
       
        }else{    
+        setProgressVisible(false)  
         Alert.alert("Parcel creation failed",JSON.stringify(res.data.data), [
           {
               text: 'OK'
@@ -118,7 +130,7 @@ function ParcelScreen() {
 
       })
       .catch(e => console.log(e))
-  
+     }
     },
     ]);
     
@@ -130,14 +142,16 @@ function ParcelScreen() {
 
     const email = await AsyncStorage.getItem('email');
     const dateToday = new Date().toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'});
-
-    axios.post("http://192.168.50.139:8082/retrieve-parcel-input", {user: email , date : dateToday})
+    
+    axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email , date : dateToday})
     .then(
       async res => {
+       
         setRetrieveData( res.data.data[0].parcel);
 
       })
     .catch(e => {
+     
       console.log(e);
     })  
   }
@@ -187,7 +201,7 @@ function ParcelScreen() {
           >
           <View style={styles.modalStyle}>
             <Text>
-              Parcel number 1
+              Parcel number {countItem}
             </Text>
 
             <View style={{marginTop:10}}/>

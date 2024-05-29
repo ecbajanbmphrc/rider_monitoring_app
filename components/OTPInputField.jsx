@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from "react";
 
-import styled from "styled-components/native";
+// import styled from "styled-components/native";
 import { colors } from "./Colors";
 
 export const OTPInputSection = styled.View`

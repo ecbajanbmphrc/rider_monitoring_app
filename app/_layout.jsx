@@ -36,6 +36,14 @@ const Layout = () => {
      }}
     />
 
+    <Stack.Screen name="auth/forgotPasswordOtp" options={{
+        title: 'fP OTP ',
+        headerShown: false,
+        headerTitleAlign: 'center'
+        
+     }}
+    />
+
     <Stack.Screen name="auth/resetPassword" options={{
         title: 'Reset Password',
         headerShown: true,
@@ -44,13 +52,7 @@ const Layout = () => {
      }}
     />
 
-    <Stack.Screen name="auth/forgotPasswordOtp" options={{
-        title: 'OTP',
-        headerShown: false,
-        headerTitleAlign: 'center'
-        
-     }}
-    />
+   
 
     
 

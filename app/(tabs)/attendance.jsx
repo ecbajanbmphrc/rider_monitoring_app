@@ -8,6 +8,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
 // import {ENV} from '../../env';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 
@@ -26,6 +27,7 @@ function AttendanceScreen() {
   const [latitude , setLatitude] = useState('');
   const [timeInAddress, setTimeInAddress] = useState('');
   const [timeOutAddress, setTimeOutAddress] = useState('');
+  const [progressVisible, setProgressVisible] = useState(false);
 
   const [refresh, setRefresh]  = useState(false); 
 
@@ -35,7 +37,8 @@ function AttendanceScreen() {
 
 
   setUserEmail(data);
-  axios.get( "http://192.168.50.139:8082/retrieve-user-attendance" ,  {params: {user: data}})
+  
+  axios.get( "https://rider-monitoring-app-backend.onrender.com/retrieve-user-attendance" ,  {params: {user: data}})
   .then(
 
   async res => {
@@ -46,6 +49,7 @@ function AttendanceScreen() {
   setTimeIn(res.data.data.time_in);
   setTimeInAddress(time_in_city_and_street);
   setStatus('time_out')
+  
 
   if(res.data.data.time_out){
     setTimeOut(res.data.data.time_out);
@@ -56,28 +60,30 @@ function AttendanceScreen() {
     setTimeOutAddress(time_out_city_and_street);
 
     setStatus('done')
+    
     console.log("is not null");
   }else{
     console.log("is null");
+   
   }
  
   console.log(res.data.data,'testining');
+  
 
   })
   .catch(e => {
     console.log(e)
+    
     setTimeIn('-----');
     setTimeOut('-----');
     setTimeInAddress('');
     setTimeOutAddress('');
     setStatus('time_in');
+   
     })
   };
 
 
-  
-
-  
 
   useFocusEffect(
     useCallback(() => {
@@ -105,16 +111,22 @@ function AttendanceScreen() {
   async function handleAttendanceTimeInSubmit(){
     const data = await AsyncStorage.getItem('email');
 
+   
+    try{
     let { status } = await Location.requestForegroundPermissionsAsync();
+    setProgressVisible(true) 
       if(status !== 'granted'){
           console.log("Please grant location permissions");
+          setProgressVisible(false) 
           return;
       }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-    
-
-
+      var currentLocation = await Location.getCurrentPositionAsync({});
+    }catch{
+      setProgressVisible(false) 
+    }
+      
+    setProgressVisible(false) 
     const attendanceData = {
         user: userEmail,
         w_date: currentDateTime.toLocaleString(),
@@ -134,25 +146,27 @@ function AttendanceScreen() {
   
     console.log(currentLocation.coords.latitude);
     
-    Alert.alert('Corfirmation:', 'You are about to input your time in!', [
+    Alert.alert('Confirmation:', 'You are about to input your time in!', [
       {
         text: 'Cancel',
         onPress: () => null,
         style: 'cancel',
       },
       {text: 'Confirm', onPress: () =>
-        
-          
+        {
+        setProgressVisible(true)  ,  
       axios
-      .put("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
+      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
         console.log('your longitude is',longitude);
 
       if(res.data.status == 200){
+        setProgressVisible(false) 
         Alert.alert("Attendance recorded successfully!");
         onRefresh();
         setStatus('time_out')
        }else{    
+        setProgressVisible(false) 
         Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
           {
               text: 'OK'
@@ -162,8 +176,8 @@ function AttendanceScreen() {
        
 
       })
-      .catch(e => console.log(e))
-  
+      .catch(e => {console.log(e), setProgressVisible(false) })
+     }
     },
     ]);
     
@@ -174,13 +188,21 @@ function AttendanceScreen() {
 
   async function handleAttendanceTimeOutSubmit(){
 
+   
+    try{
+      setProgressVisible(true)
     let { status } = await Location.requestForegroundPermissionsAsync();
     if(status !== 'granted'){
+       setProgressVisible(false)
         console.log("Please grant location permissions");
         return;
     }
 
-    let currentLocation = await Location.getCurrentPositionAsync({});
+    var currentLocation = await Location.getCurrentPositionAsync({});
+   }catch{
+      setProgressVisible(false)
+   }
+      setProgressVisible(false)
 
     let timeoutLatitude = currentLocation.coords.latitude;
     let timeoutLongitude = currentLocation.coords.longitude;
@@ -197,21 +219,26 @@ function AttendanceScreen() {
 
     }
 
-    Alert.alert('Corfirmation:', 'You are about to input your time out!', [
+    Alert.alert('Confirmation:', 'You are about to input your time out!', [
       {
         text: 'Cancel',
         onPress: () => null,
         style: 'cancel',
       },
-      {text: 'Confirm', onPress: () =>  axios
-      .put("http://192.168.50.139:8082/attendance-input-time-out", attendanceData)
+      {text: 'Confirm', onPress: () => 
+       {
+        setProgressVisible(true) 
+       axios
+      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-out", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){
+        setProgressVisible(false) 
         Alert.alert("Attendance recorded successfully!");
         onRefresh();
         setStatus('done')
-       }else{    
+       }else{   
+        setProgressVisible(false)  
         Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
           {
               text: 'OK'
@@ -221,7 +248,9 @@ function AttendanceScreen() {
        
 
       })
-      .catch(e => console.log(e))},
+      .catch(e => {console.log(e), setProgressVisible(false) })
+      }
+     },
     ]);
     
         
@@ -232,6 +261,13 @@ function AttendanceScreen() {
     <SafeAreaView style={{flex: 1}}>
      <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
      <View style={{flex:1, marginTop: 35}}>
+
+     <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+      />
+
 
       <View style={cardStyles.cardView}>
       <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 40, fontWeight: '800',  color:'#FFFFFF'}}>
