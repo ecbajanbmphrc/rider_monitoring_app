@@ -2,8 +2,8 @@ import {React,  useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 const { Alert, Text, View,  StyleSheet, Pressable, Keyboard, BackHandler, ScrollView, TouchableOpacity} = require('react-native');
 import { SafeAreaView } from 'react-native-safe-area-context';
-import OTPInputField from "../../components/OTPInputField";
 import axios from 'axios';
+import { TextInput } from "react-native-paper";
 
 
 
@@ -37,7 +37,7 @@ function RegisterOtp({navigation}){
     if(checkCode === code){
       console.log("Success");
       axios
-        .post("http://192.168.50.139:8082/register-user-detail", userData)
+        .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
         .then(res => {console.log(res.data)
 
           if(res.data.status == 200){
@@ -55,7 +55,7 @@ function RegisterOtp({navigation}){
           })
         .catch(e => console.log(e));
     }else{
-      console.log(password,"testingngnn");
+      console.log(checkCode,"testingngnn");
       Alert.alert('Account creation failed!', 'Invalid OTP input!');
     }
    
@@ -64,24 +64,32 @@ function RegisterOtp({navigation}){
 
     return(
           <View>
-            <View>
-             <Pressable style={style.container} onPress={Keyboard.dismiss}>
+             <View style={style.container}>
             
               <Text style={{fontSize: 36, marginVertical: 60, color: "#111"}}>
                 OTP
               </Text>
               <Text style={{fontSize: 25, color: "#111"}}>Verify your email </Text>
               <Text style={{fontSize: 15, color: "#111"}}>Enter 4 digits code received on your gmail: </Text>
-              <Text style={{fontSize: 16, color: "#111", marginTop: 14}}> {email}</Text>  
-                <OTPInputField
+              <Text style={{fontSize: 16, color: "#111", marginVertical: 14}}> {email}</Text>  
+                {/* <OTPInputField
                   setPinReady={setPinReady}
                   code={code}
                   setCode={setCode}
                   maxLength={max_code_length}
-                  />    
-
+                  />     */}
+                  
+                <TextInput 
+                    mode="outlined"
+                    placeholderTextColor="#76ABAE" 
+                    theme={{ roundness: 8 }}
+                    style={{textAlign:"center", width: "76%"}}
+                    onChangeText={inputText => setCode(inputText)}
+                    defaultValue={code}
+                    keyboardType="number-pad"
+                    maxLength={4}     />     
                         
-               </Pressable>
+               
               </View>
 
               <View style={styles.button}>
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   submitButton: {
-    width: '75%',
+    width: '84%',
     backgroundColor: '#420475',
     alignItems: 'center',
     paddingHorizontal: 15,

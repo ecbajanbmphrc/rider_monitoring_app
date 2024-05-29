@@ -4,6 +4,7 @@ import { TextInput } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { CheckBox } from '@rneui/themed';
 import axios from 'axios';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 
@@ -17,6 +18,7 @@ function ResetPasswordScreen({navigation}) {
     const [checked, setChecked] = useState(false);
     const toggleCheckbox = () => setChecked(!checked);
     const router = useRouter();
+    const [progressVisible, setProgressVisible] = useState(false);
 
     const { email} = useLocalSearchParams();
 
@@ -30,16 +32,18 @@ function ResetPasswordScreen({navigation}) {
      
       if(passwordVerify && confirmPasswordVerify){
           if(password !== confirmPassword)  return  Alert.alert('Password does not match')
-
+          setProgressVisible(true);
           axios
-          .put("http://192.168.50.139:8082/forgot-password-reset", userData)
+          .put("https://rider-monitoring-app-backend.onrender.com/forgot-password-reset", userData)
           .then(res => {
 
           if(res.data.status == 200){
+            setProgressVisible(false);
             Alert.alert("Password is successfully reset!");
             router.replace('auth/login');
          
-           }else{    
+           }else{   
+            setProgressVisible(false); 
             Alert.alert("Attempt to reset password failed!",JSON.stringify(res.data.data), [
               {
                   text: 'OK'
@@ -47,7 +51,7 @@ function ResetPasswordScreen({navigation}) {
             ]);
            }
           })
-          .catch(e => console.log(e)); 
+          .catch(e => {{console.log(e), setProgressVisible(false);}}); 
 
           console.log("password confrimed");
            
@@ -90,6 +94,13 @@ function ResetPasswordScreen({navigation}) {
          showsVerticalScrollIndicator={false}
          style={{backgroundColor: 'white'}}>    
          <View style={styles.forgotPasswordContainer}>
+
+         <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+                />
+
          <View style = {styles.textInputResetPassword}>
                     <TextInput 
                     mode="outlined"

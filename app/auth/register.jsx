@@ -6,6 +6,7 @@ import { CheckBox } from '@rneui/themed';
 import * as React from "react";
 import axios from 'axios';
 import { useRouter} from 'expo-router';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 function RegisterPage({props}){
@@ -32,6 +33,7 @@ function RegisterPage({props}){
     const [checked, setChecked] = useState(false);
     const toggleCheckbox = () => setChecked(!checked);
     const router = useRouter();
+    const [progressVisible, setProgressVisible] = useState(false);
 
   
 
@@ -49,13 +51,14 @@ function RegisterPage({props}){
        
         if(firstNameVerify && lastNameVerify && emailVerify && addressVerify && passwordVerify && phoneVerify && confirmPasswordVerify){
             if(password !== confirmPassword)  return  Alert.alert('Password does not match')
-
+            setProgressVisible(true);
             axios
-            .post("http://192.168.50.139:8082/send-otp-register", userData)
+            .post("https://rider-monitoring-app-backend.onrender.com/send-otp-register", userData)
             .then(res => {
 
             if(res.data.status == 200){
                 console.log(userData, "test data");
+                setProgressVisible(false);
            
              router.push({pathname: 'auth/registerOtp', params: {email: res.data.email, otpCode: res.data.code, 
                 first_name: firstName,
@@ -66,6 +69,7 @@ function RegisterPage({props}){
                 address: address,
                 password: password,} });
              }else{    
+              setProgressVisible(false);
               Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
                 {
                     text: 'OK'
@@ -73,11 +77,11 @@ function RegisterPage({props}){
               ]);
              }
             })
-            .catch(e => console.log(e)); 
+            .catch(e => {{console.log(e), setProgressVisible(true);}}); 
              
             
             // axios
-            // .post("http://192.168.50.139:8082/register-user-detail", userData)
+            // .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
              // .then(res => {console.log(res.data)
 
             // if(res.data.status == 200){
@@ -199,9 +203,11 @@ function RegisterPage({props}){
         <View>
            
             <View style={styles.loginContainer}>
-              <Text>
-             
-              </Text>
+                <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+                />
                 
                 <View style = {styles.textInputRegistration}>
                     <TextInput 

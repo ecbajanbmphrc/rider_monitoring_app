@@ -14,6 +14,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { err } from 'react-native-svg';
+// import ProgressDialog from '../../components/ProgressDialog';
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 
@@ -26,6 +28,7 @@ function LoginPage({navigation}){
     const [emailVerify, setEmailVerify] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordVerify, setPasswordVerify] = useState(false);
+    const [progressVisible, setProgressVisible] = useState(false);
 
     const router = useRouter();
    
@@ -41,10 +44,14 @@ function LoginPage({navigation}){
         }
       if(!emailVerify) return Alert.alert('Please input your email!');
       if(!passwordVerify) return Alert.alert('Please input your password!');
-        axios.post("http://192.168.50.139:8082/login-user", userData)
+      
+       setProgressVisible(true)
+      axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
         .then(
         res => {
         if(res.data.status === 200){
+            // <ProgressDialog visible={false} />   
+            setProgressVisible(false) 
             Alert.alert('Login Successful');
             AsyncStorage.setItem('token', res.data.data);
             AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
@@ -53,12 +60,18 @@ function LoginPage({navigation}){
             setEmail('');
             setPassword(''); 
             router.replace('/(tabs)/dashboard');
+           
+
+            
           
         }else if(res.data.status === 401) {
+           
+            setProgressVisible(false) 
             Alert.alert('Login Failed!', res.data.data);
              }
         }).catch(error =>{
            console.log(error);
+           setProgressVisible(false)   
            Alert.alert(error);
          
         } );
@@ -97,7 +110,13 @@ function LoginPage({navigation}){
                 <Image style={styles.logo} source = {require('../../assets/bmp.png')}/>
             </View>
             <View style={styles.loginContainer}>
+           
                 <Text style={styles.text_header}>Login</Text>
+                <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+                />
                 <View style= {styles.action}>
                     <FontAwesome name="envelope" color="#420475" style={styles.emailIcon}/>
                     <TextInput 
