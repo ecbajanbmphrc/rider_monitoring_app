@@ -32,7 +32,10 @@ export default function CustomDrawerContent(props){
           AsyncStorage.setItem('isLoggedIn','');
           AsyncStorage.setItem('token','');
           AsyncStorage.setItem('email','');
+          AsyncStorage.setItem('first_name','');
+          AsyncStorage.setItem('middle_name','');
           AsyncStorage.setItem('last_name','');
+          AsyncStorage.setItem('phone_number','');
           router.replace('/auth/login');}
         },
         ]);

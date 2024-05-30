@@ -51,12 +51,16 @@ function LoginPage({navigation}){
         res => {
         if(res.data.status === 200){
             // <ProgressDialog visible={false} />   
+         
             setProgressVisible(false) 
             Alert.alert('Login Successful');
             AsyncStorage.setItem('token', res.data.data);
             AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
             AsyncStorage.setItem('email', res.data.email);
+            AsyncStorage.setItem('first_name', res.data.first_name);
+            AsyncStorage.setItem('middle_name', res.data.middle_name);
             AsyncStorage.setItem('last_name', res.data.last_name);
+            AsyncStorage.setItem('phone_number', res.data.phone);
             setEmail('');
             setPassword(''); 
             router.replace('/(tabs)/dashboard');
@@ -72,9 +76,11 @@ function LoginPage({navigation}){
         }).catch(error =>{
            console.log(error);
            setProgressVisible(false)   
-           Alert.alert(error);
+          Alert.alert('Login Error');
          
         } );
+
+        
     
     }
 

@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { TextInput } from "react-native-paper";
 
-
+import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
 
@@ -22,6 +22,7 @@ function RegisterOtp({navigation}){
   const [code, setCode] = useState("");
   const [pinReady, setPinReady] = useState(false);
   const max_code_length = 4;
+  const [progressVisible, setProgressVisible] = useState(false);
 
 
   function handleSubmit(){
@@ -36,14 +37,17 @@ function RegisterOtp({navigation}){
       password: password}
     if(checkCode === code){
       console.log("Success");
+      setProgressVisible(true);
       axios
         .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
         .then(res => {console.log(res.data)
 
           if(res.data.status == 200){
+              setProgressVisible(false);
               Alert.alert("Registered Successfully!");
               router.replace('auth/login');
           }else{    
+              setProgressVisible(false);           
               Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
                 {
                     text: 'OK'
@@ -53,7 +57,7 @@ function RegisterOtp({navigation}){
              
 
           })
-        .catch(e => console.log(e));
+        .catch(e => {console.log(e), setProgressVisible(false), Alert.alert('Error!')});
     }else{
       console.log(checkCode,"testingngnn");
       Alert.alert('Account creation failed!', 'Invalid OTP input!');

@@ -1,213 +1,113 @@
+import { useFocusEffect } from "expo-router";
 import {React,  useState } from "react";
 import { View, SafeAreaView, TouchableOpacity, Text, StyleSheet, ScrollView } from "react-native";
-import { TextInput } from 'react-native-paper';
+import {Avatar, Icon, TextInput, Title} from 'react-native-paper';
+import { useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-const apiKey = 'c582beac259045698b7c77f3bc81d380';
-const apiURL = 'https://emailvalidation.abstractapi.com/v1/' + apiKey
 
  
  
 const ProfileScreen = () => {
 
 
-  const [email, setEmail] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+ const[firstName, setFirstName] = useState("first name");
+ const[middleName, setMiddleName] = useState("middle name");
+ const[lastName, setLastName] = useState("last name");
+ const[phoneNumber, setPhoneNumber] = useState("phone number");
+ const[email, setEmail] = useState("email");
 
-  const [otp, setOtp] = useState(['-', '-', '-', '-', '-', '-']);
-  const [otpVal, setOtpVal] = useState('');
+ async function getData(){
+ 
+  const a_email = await AsyncStorage.getItem('email');
+  const a_firstName = await AsyncStorage.getItem('first_name');
+  const a_middleName = await AsyncStorage.getItem('middle_name');
+  const a_lastName = await AsyncStorage.getItem('last_name');
+  const a_phoneNumber = await AsyncStorage.getItem('phone_number');
 
-  const sendEmailValidationRequest = async (email) => {
-      // try {
-          const response = await fetch(apiURL + '&email=' + email);
-          const data = response.json();
-          return console.log(data.is_valid_format.value);
-      // } catch (error) {
-      //     throw error;
-      // }
-  }
-  const handleSubmit = async (email) => {
-      // try {
-          const isValid = await sendEmailValidationRequest('ecbajan.bmphrc@gmail.com');
-          if (isValid) {
-              setErrorMessage("");
-              console.log("SUBMITTED! ", email);
-          }
-      //  else {
-      //         setErrorMessage("INVALID EMAIL.PLEASE CHECK YOUR INPUT AND TRY AGAIN.");
-      //         console.log("EMAIL WAS INVALID.", email);
-      //     }
-      //     return isValid;
-      // } catch (error) {
-      //     setErrorMessage("SOMETHING WENT WRONG.PLEASE TRY AGAIN LATER.");
-      // }
-  }
+  setEmail(a_email);
+  setFirstName(a_firstName);
+  setMiddleName(a_middleName);
+  setLastName(a_lastName);
+  setPhoneNumber(a_phoneNumber);
+
+
+ }
+
+  useFocusEffect(
+   useCallback(() => { 
+    getData()
+   }, [])
+  );
+
  return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}} 
-    showsVerticalScrollIndicator={false}
-    style={{backgroundColor: 'white'}}>    
-    <View style={styles.forgotPasswordContainer}>
-     <View style = {styles.textInputEmail}>
-               <TextInput 
-               style={{textAlign:"center"}}
-               mode="outlined"
-               keyboardType="number"
-               placeholderTextColor="#76ABAE" 
-               onChange={e => handleEmail(e)}
-               theme={{ roundness: 8 }}
-               right= { email.length < 1 ? null : emailVerify ? (
-                   <TextInput.Icon 
-                   color="green"
-                   icon="check" />
-               ) : (
-                   <TextInput.Icon 
-                   color="red"
-                   icon="exclamation" />
-               )} 
-                  
-               />                         
-           </View>
-          
-           {email.length < 1 ? null : emailVerify ? null : (
-                   <Text
-                       style={{
-                           marginLeft:20,
-                           color:'red',
-                   }}>
-                           Enter proper email address
-                   </Text>
-           )}
 
-           <View style={styles.button}>
-               <TouchableOpacity style={styles.submitButton}
-                   onPress={() => {
-                       handleSubmit()
-                   }}>
-                   <View>
-                       <Text style={styles.submitTextSign}>
-                          Send OTP Code
-                       </Text>
-                   </View>
-               </TouchableOpacity>
-           </View>
-     </View>
-  </ScrollView>
- )
+    <View style={styles.viewStyle}>
+     <View  style={{alignItems:"center"}}>
+      <Avatar.Image
+                source={
+                    require('../../assets/avatar_128.png')
+                }
+                size={100}
+                style={{marginTop: 5, backgroundColor: '#FFF7F1'}}
+              />
+      </View>        
+      {/* <Text style={styles.textStyle}>This is Dashboard Screen</Text>   */}
+      <View style={{padding:15}}>
+       <Text style={styles.textStyle}>First Name:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {firstName}
+        editable = {false}      
+       />
+       <Text style={styles.textStyle}>Middle Name:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {middleName}
+        editable = {false}      
+       />
+       <Text style={styles.textStyle}>Last Name:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {lastName}
+        editable = {false}      
+       />
+       <Text style={styles.textStyle}>Phone Number:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {phoneNumber}
+        editable = {false}      
+       />
+       <Text style={styles.textStyle}>Email:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {email}
+        editable = {false}      
+       />
+      </View>   
+    </View>   
+  );
+
 }
 
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  emailInput: {
-      width: 250,
-      height: 25,
-    borderWidth: 1,
-    borderColor: 'black',
-  },
-  button: {
-      borderWidth: 1,
-      borderColor: 'green',
-      borderRadius: 15,
-      marginTop: 25,
-      padding: 10,
-      alignItems: 'center'
-  },
-  otpBoxesContainer: {
-    flexDirection: 'row'
-},
-otpBox: {
-    padding: 10,
-    marginRight: 10,
-    borderWidth: 2,
-    borderColor: "#f0e2d1",
-    height: 55,
-    width: 55,
-    textAlign: 'center',
-    borderRadius: 8,
-    backgroundColor: "white"
-},
-
-viewStyle: {
+  viewStyle: {
     display: 'flex',
-  //   justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     flex: 1,
+    backgroundColor: "#FFF"
   },
   textStyle: {
-    fontSize: 28,
+    fontSize: 16,
     color: 'black',
+    marginVertical: 10
   },
   headingStyle: {
     fontSize: 30,
     color: 'black',
     textAlign: 'center',
   },
-  input: {
-      height: 40,
-      margin: 12,
-      borderWidth: 1,
-      padding: 10,
-    },
-  button: {
-    alignItems: 'center',
-    marginTop: 10,
-    alignItems: 'center',
-    textAlign: 'center',
-    margin: 20,
-    },
-  // submitButton: {
-  //     width: '75%',
-  //     backgroundColor: '#420475',
-  //     alignItems: 'center',
-  //     paddingHorizontal: 15,
-  //     paddingVertical: 15,
-  //     borderRadius: 10,
-  //   },
-  textSign: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: 'white',
-    },  
-  textInputEmail: {
-      paddingTop: 10,
-      paddingBottom: 1,
-  
-  },  
-  forgotPasswordContainer: {
-      backgroundColor: '#fff',
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
-      paddingHorizontal: 20,
-      paddingVertical: 30,
-    },
-  action: {
-      flexDirection: 'row',
-      paddingTop: 14,
-      paddingBottom: 3,
-      marginTop: 15,
-  
-      paddingHorizontal: 15,
-  
-      borderWidth: 1,
-      borderColor: '#420475',
-      borderRadius: 10,
-    },
-
-  submitButton: {
-      marginTop: 10,
-      width: '110%',
-      alignItems: 'center',
-      paddingHorizontal: 10,
-      paddingVertical: 15,
-      borderRadius: 10,
-      borderColor: '#420475',
-      borderWidth: 1,
-      backgroundColor: '#420475'
-    },
-  
-  submitTextSign: {
-      fontSize: 15,
-      fontWeight: 'bold',
-      color: '#FFF',
-    },  
 });
