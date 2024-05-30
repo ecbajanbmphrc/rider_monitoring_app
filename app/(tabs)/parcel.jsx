@@ -18,7 +18,7 @@ import { ProgressDialog } from 'react-native-simple-dialogs';
 function ParcelScreen() {
 
   const bottomSheetModalRef = useRef(null);
-  const snapPoints = ["40%"];
+  const snapPoints = ["35%"];
   const [isOpen, setIsOpen] = useState(false);
   const [countItem, setCountItem] = useState(1);
 
@@ -129,7 +129,7 @@ function ParcelScreen() {
        
 
       })
-      .catch(e => console.log(e))
+      .catch(e => {console.log(e), setProgressVisible(false),  Alert.alert("Error!" , "Parcel creation failed") })
      }
     },
     ]);
@@ -204,9 +204,10 @@ function ParcelScreen() {
               Parcel number {countItem}
             </Text>
 
-            <View style={{marginTop:10}}/>
+            <View style={{marginTop:30}}/>
 
             <DropDownPicker
+             dropDownDirection="BOTTOM"
              open={open}
              value={value}
              items={items}
@@ -218,7 +219,7 @@ function ParcelScreen() {
             }}
             />
 
-            <View style={{marginTop:10}}/>
+            <View style={{marginTop:30}}/>
 
             <TouchableOpacity 
              style={styles.submitButton}

@@ -336,12 +336,10 @@ function AttendanceScreen() {
      
      </View>
 
-     </ScrollView>
-
-  {status === "time_in" &&(
+    {status === "time_in" &&(
       <View style={styles.button}>
       <TouchableOpacity 
-       style={styles.loginButton}
+       style={styles.timeButton}
        onPress={() => handleAttendanceTimeInSubmit() }
       >
           <View>
@@ -351,27 +349,31 @@ function AttendanceScreen() {
           </View>
       </TouchableOpacity>
       </View>
-  )
-  }
+     )
+    }
 
-  {status === "time_out" &&(
+    {status === "time_out" &&(
 
-   <View style={styles.button}>
-    <TouchableOpacity   
-      style={styles.loginButton}
+     <View style={styles.button}>
+     <TouchableOpacity   
+      style={styles.timeButton}
       onPress={() => handleAttendanceTimeOutSubmit() }
-    >
-     <View>
-        <Text style={styles.textSign}>
-            Time Out
-        </Text>
-     </View>
-    </TouchableOpacity>
+     >
+    <View>
+     <Text style={styles.textSign}>
+         Time Out
+     </Text>
+    </View>
+   </TouchableOpacity>
   </View>
-
-
-  )
+   )
   }
+
+     </ScrollView>
+
+  
+
+ 
 
        
     </SafeAreaView>
@@ -399,16 +401,16 @@ const styles = StyleSheet.create({
     },
     button: {
       alignItems: 'center',
-      // marginTop: 0,
+      marginTop: 5,
       alignItems: 'center',
       textAlign: 'center',
-      margin: 20,
+      marginHorizontal: "3.5%",
     },
-    loginButton: {
+    timeButton: {
       width: '100%',
       backgroundColor: '#420475',
       alignItems: 'center',
-      marginTop: -320,
+      // marginTop: -320,
       paddingHorizontal: 15,
       paddingVertical: 15,
       borderRadius: 10,

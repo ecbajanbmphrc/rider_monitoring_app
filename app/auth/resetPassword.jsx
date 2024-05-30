@@ -51,7 +51,7 @@ function ResetPasswordScreen({navigation}) {
             ]);
            }
           })
-          .catch(e => {{console.log(e), setProgressVisible(false);}}); 
+          .catch(e => {{console.log(e), Alert.alert("Error"),setProgressVisible(false);}}); 
 
           console.log("password confrimed");
            

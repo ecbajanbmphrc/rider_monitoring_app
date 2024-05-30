@@ -77,7 +77,7 @@ function RegisterPage({props}){
               ]);
              }
             })
-            .catch(e => {{console.log(e), setProgressVisible(true);}}); 
+            .catch(e => {{console.log(e), Alert.alert("Error"), setProgressVisible(false);}}); 
              
             
             // axios
