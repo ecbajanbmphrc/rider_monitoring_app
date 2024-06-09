@@ -5,7 +5,7 @@ import { Drawer } from 'expo-router/drawer';
 import { color } from '@rneui/base';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomDrawerContent from '../../components/CustomDrawerContent';
-
+import {View, Text, TouchableOpacity} from 'react-native';
 
 const DrawerLayout = () => {
     return(
@@ -15,6 +15,7 @@ const DrawerLayout = () => {
             // drawerHideStatusBarOnOpen: true,
             // drawerActiveBackgroundColor: '#5363df',
             // drawerActiveTintColor: '#fff',
+          
             drawerLabelStyle: { marginLeft: -20},
          }}
          >
@@ -26,6 +27,7 @@ const DrawerLayout = () => {
                 drawerIcon: ({ size = 100, color }) => (
                     <Icon name='chart-box-outline' size={20}/>
                 ),
+                
              }}
              />
 

@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
-const { Alert} = require('react-native');
+const { Alert, Image} = require('react-native');
 import React, { useState, useEffect } from 'react';
 const {Text, StyleSheet, View, SafeAreaView, Dimensions, TouchableOpacity} = require('react-native');
 import axios from 'axios';
@@ -20,7 +20,8 @@ function AttendanceScreen() {
   const [userEmail, setUserEmail] = useState('');
   const [timeIn, setTimeIn] = useState('-----');
   const [timeOut, setTimeOut] = useState('-----');
-  const [status, setStatus] = useState('time_in');
+  const [status, setStatus] = useState('');
+  const [connection, setConnection] = useState(true);
 
   const [test, setTest] = useState('');
   const [longitude , setLongitude] = useState('');
@@ -42,33 +43,44 @@ function AttendanceScreen() {
   .then(
 
   async res => {
-  const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
-   
-  const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
 
-  setTimeIn(res.data.data.time_in);
-  setTimeInAddress(time_in_city_and_street);
-  setStatus('time_out')
-  
+    
 
-  if(res.data.data.time_out){
-    setTimeOut(res.data.data.time_out);
-    const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
-    
-    const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
-    
-    setTimeOutAddress(time_out_city_and_street);
 
-    setStatus('done')
-    
-    console.log("is not null");
-  }else{
-    console.log("is null");
-   
+  if(res.data.status === 400){
+    setConnection(true);
+    setStatus("time_in");
+    setTimeIn('-----');
+    setTimeOut('-----');
+    setTimeInAddress('');
+    setTimeOutAddress('');
   }
- 
-  console.log(res.data.data,'testining');
-  
+  else if (res.data.status === 200){
+    if(!res.data.data.time_out){
+      setConnection(true)
+      const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
+      const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+      setTimeIn(res.data.data.time_in);
+      setTimeInAddress(time_in_city_and_street);
+      setStatus('time_out')
+    }else{
+      setConnection(true)
+
+      const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
+      const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+      setTimeIn(res.data.data.time_in);
+      setTimeInAddress(time_in_city_and_street);
+
+      setTimeOut(res.data.data.time_out);
+      const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
+      const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
+      setTimeOutAddress(time_out_city_and_street);
+      setStatus('done') 
+
+    }
+    
+  }
+
 
   })
   .catch(e => {
@@ -78,7 +90,8 @@ function AttendanceScreen() {
     setTimeOut('-----');
     setTimeInAddress('');
     setTimeOutAddress('');
-    setStatus('time_in');
+    setStatus('no_internet');
+    setConnection(false);
    
     })
   };
@@ -144,7 +157,7 @@ function AttendanceScreen() {
        
     };  
   
-    console.log(currentLocation.coords.latitude);
+   
     
     Alert.alert('Confirmation:', 'You are about to input your time in!', [
       {
@@ -285,6 +298,8 @@ function AttendanceScreen() {
       </View>  
 
       <View style={cardStyles.timeCardView}>
+       {connection? 
+       <View>
         <Text style={{marginTop: 5,alignSelf: 'center', fontSize: 35, fontWeight: '500',  color:'#000000'}}>
           Time In:
         </Text>
@@ -329,8 +344,20 @@ function AttendanceScreen() {
         
 
       </Text>
-
-
+      </View>
+       :
+       <View style={{alignItems:"center"}}>
+        <Image
+                source={
+                    require('../../assets/no-network-256.png')
+                }
+                
+                style={{marginTop: 5, height:150, width:150}}
+              />
+        <Text style={styles.textNoConnection}>No Internet Connection</Text>
+       </View>
+       
+       }
       </View>  
 
      
@@ -369,6 +396,14 @@ function AttendanceScreen() {
    )
   }
 
+  {status === "no_internet" &&(
+
+  <View>
+ 
+    </View>
+    )
+  }
+
      </ScrollView>
 
   
@@ -389,6 +424,12 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       flex: 1,
+    },
+    textNoConnection: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 10
+      
     },
     textStyle: {
       fontSize: 28,

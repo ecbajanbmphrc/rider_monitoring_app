@@ -1,3 +1,4 @@
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import React, { useState } from 'react';
 const { Image, Text, StyleSheet, View, TouchableOpacity, Alert, FlatList} = require('react-native');
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,12 +16,14 @@ import { useCallback } from 'react';
 import { ProgressDialog } from 'react-native-simple-dialogs';
 
 
+
 function ParcelScreen() {
 
   const bottomSheetModalRef = useRef(null);
   const snapPoints = ["35%"];
   const [isOpen, setIsOpen] = useState(false);
   const [countItem, setCountItem] = useState(1);
+  const [refresh, setRefresh]  = useState(false); 
 
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [retrieveData, setRetrieveData] = useState('');
@@ -39,6 +42,10 @@ function ParcelScreen() {
      retrieveParcelData();
     }, [])
   );
+
+  async function onRefresh(){
+    console.log("refresh test")
+  }
 
 
   const Item = ({item}) => {
@@ -167,7 +174,8 @@ function ParcelScreen() {
       <View style={{
         flex: 1,
         backgroundColor: isOpen ? "gray" : "#f2f2f2"
-       }}>
+       }}
+       >
 
       <View style={styles.container}>
         <FlatList
