@@ -15,7 +15,7 @@ const Page = () => {
             if (emaildata !== null) {  
                 router.replace('/(tabs)/dashboard');
             }else{
-                router.replace('/auth/login');
+                router.replace('/auth/login',);
             }
         } catch (error) {
             console.error("Error retrieving isLoggedIn value from AsyncStorage:", error);
@@ -29,7 +29,7 @@ const Page = () => {
  
     return (
     <View style={styles.viewStyle}>
-        <Text style={styles.textStyle}>Loading.....</Text>
+        {/* <Text style={styles.textStyle}>Loading.....</Text> */}
       </View>
     );
 }
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       flex: 1,
+      backgroundColor: '#FFF'
     },
     textStyle: {
       fontSize: 28,
