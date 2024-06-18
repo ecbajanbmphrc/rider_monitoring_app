@@ -98,7 +98,6 @@ function ParcelScreen() {
 
     const parcelData = {
         user: data,
-        date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),    
         parcel_count: countItem,
         parcel_type: selectType
     };  

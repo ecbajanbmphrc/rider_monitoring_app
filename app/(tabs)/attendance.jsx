@@ -8,7 +8,8 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
 // import {ENV} from '../../env';
-import { ProgressDialog } from 'react-native-simple-dialogs';
+import { ProgressDialog, ConfirmDialog } from 'react-native-simple-dialogs';
+import { TextInput } from 'react-native-paper';
 
 
 
@@ -29,6 +30,8 @@ function AttendanceScreen() {
   const [timeInAddress, setTimeInAddress] = useState('');
   const [timeOutAddress, setTimeOutAddress] = useState('');
   const [progressVisible, setProgressVisible] = useState(false);
+  const [timeOutConfirmation, setTimeOutConfirmation] = useState(false);
+  const [assignedParcel, setAssignedParcel] = useState('');
 
   const [refresh, setRefresh]  = useState(false); 
 
@@ -142,9 +145,6 @@ function AttendanceScreen() {
     setProgressVisible(false) 
     const attendanceData = {
         user: userEmail,
-        w_date: currentDateTime.toLocaleString(),
-        date: currentDateTime.toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'}),
-        time_in: currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'}),
         time_in_coordinates: {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude
@@ -201,6 +201,8 @@ function AttendanceScreen() {
 
   async function handleAttendanceTimeOutSubmit(){
 
+
+    if(!assignedParcel || assignedParcel === 0 ) return Alert.alert('Unable to proceed', 'Please input assigned parcels')
    
     try{
       setProgressVisible(true)
@@ -223,14 +225,15 @@ function AttendanceScreen() {
     time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})
 
     const attendanceData = {
-      user: userEmail, 
-      time_out : time_out_input, 
+      user: userEmail,
       time_out_coordinates : {
         latitude: timeoutLatitude,
         longitude : timeoutLongitude
-      }
+      },
+      assignedParcel: assignedParcel
 
     }
+
 
     Alert.alert('Confirmation:', 'You are about to input your time out!', [
       {
@@ -249,6 +252,8 @@ function AttendanceScreen() {
         setProgressVisible(false) 
         Alert.alert("Attendance recorded successfully!");
         onRefresh();
+        setAssignedParcel('')
+        setTimeOutConfirmation(false)
         setStatus('done')
        }else{   
         setProgressVisible(false)  
@@ -265,13 +270,17 @@ function AttendanceScreen() {
       }
      },
     ]);
+
+
+
+    
     
         
              
   }
 
     return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1 }}>
      <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
      <View style={{flex:1, marginTop: 35}}>
 
@@ -280,6 +289,42 @@ function AttendanceScreen() {
                  title="Loading"
                  message="Please, wait..."
       />
+
+    <ConfirmDialog
+      title="Time out"
+      visible={timeOutConfirmation}
+      positiveButton={{
+        titleStyle: {color: "#41749b"},
+        title: "Confirm",
+        onPress: () => handleAttendanceTimeOutSubmit()
+      }} 
+
+      negativeButton={{
+        titleStyle: {color: "#41749b"},
+        title: "Cancel",
+        onPress: () => setTimeOutConfirmation(false)
+      }}
+      >
+  
+      <View>
+        <Text style={{marginBottom: 20,alignSelf: 'flex-start', fontSize: 15,  color:'#000000'}}>
+         Please input your Assigned Parcels
+        </Text>
+        <TextInput 
+            mode="outlined"
+            placeholderTextColor="#76ABAE" 
+            theme={{
+              colors: {
+                    text: 'white',
+                 }
+           }}
+            style={{textAlign:"left", width: "100%"}}
+            onChangeText={inputText => setAssignedParcel(inputText)}
+            defaultValue={assignedParcel}
+            keyboardType="number-pad"
+            maxLength={4}     />   
+      </View>
+    </ConfirmDialog>
 
 
       <View style={cardStyles.cardView}>
@@ -384,7 +429,7 @@ function AttendanceScreen() {
      <View style={styles.button}>
      <TouchableOpacity   
       style={styles.timeButton}
-      onPress={() => handleAttendanceTimeOutSubmit() }
+      onPress={() => setTimeOutConfirmation(true)}
      >
     <View>
      <Text style={styles.textSign}>
@@ -410,8 +455,8 @@ function AttendanceScreen() {
 
  
 
-       
-    </SafeAreaView>
+     </SafeAreaView>
+
     );
 
 }
@@ -419,6 +464,9 @@ function AttendanceScreen() {
 export default AttendanceScreen;
 
 const styles = StyleSheet.create({
+    title:{
+      color:'#000'
+    },
     viewStyle: {
       display: 'flex',
       justifyContent: 'center',
@@ -467,6 +515,9 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   text:{
+    color:'#000'
+  },
+  title:{
     color:'#000'
   },
   cardView:{
