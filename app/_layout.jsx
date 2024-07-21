@@ -52,6 +52,32 @@ const Layout = () => {
      }}
     />
 
+
+    <Stack.Screen name="pages/parcelInput" options={{
+        title: 'Parcel Details',
+        headerShown: true,
+        headerTitleAlign: 'center'
+        
+     }}
+    />
+
+    
+    <Stack.Screen name="pages/parcelImageReceipt" options={{
+        title: 'Remittance Receipt',
+        headerShown: true,
+        headerTitleAlign: 'center'
+        
+     }}
+    />
+
+    <Stack.Screen name="pages/parcelImageScreenshot" options={{
+        title: 'Total Delivered Screenshot',
+        headerShown: true,
+        headerTitleAlign: 'center'
+        
+     }}
+    />
+
    
 
     
