@@ -58,13 +58,13 @@ function DashboardScreen({navigation}) {
       async res => {
        
         // setRetrieveData( res.data.data[0].parcel);
-        console.log("check",res.data.data[0])
+    
         const testNull = await res.data.data;
 
         if(testNull.length !== 0){
-          setTotalBulk(res.data.data[0].count_bulk)
-          setTotalNonBulk(res.data.data[0].count_non_bulk)
-          setTotalParcel(res.data.data[0].count_bulk + res.data.data[0].count_non_bulk)
+          setTotalBulk(res.data.data[0].parcel_bulk_count)
+          setTotalNonBulk(res.data.data[0].parcel_non_bulk_count)
+          setTotalParcel(res.data.data[0].total_parcel)
          
         
         }else{
@@ -75,6 +75,10 @@ function DashboardScreen({navigation}) {
 
       })
     .catch(e => {
+
+      setTotalBulk(0)
+      setTotalNonBulk(0)
+      setTotalParcel(0)
      
       console.log(e);
     })  

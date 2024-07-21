@@ -50,7 +50,7 @@ function LoginPage({navigation}){
         .then(
         res => {
         if(res.data.status === 200){
-            // <ProgressDialog visible={false} />   
+            // <ProgressDialog visible={false} />  
          
             setProgressVisible(false) 
             Alert.alert('Login Successful');
@@ -61,6 +61,7 @@ function LoginPage({navigation}){
             AsyncStorage.setItem('middle_name', res.data.middle_name);
             AsyncStorage.setItem('last_name', res.data.last_name);
             AsyncStorage.setItem('phone_number', res.data.phone);
+            AsyncStorage.setItem('id', res.data.id);
             setEmail('');
             setPassword(''); 
             router.replace('/(tabs)/dashboard');

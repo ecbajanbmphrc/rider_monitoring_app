@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
-// import {ENV} from '../../env';
 import { ProgressDialog, ConfirmDialog } from 'react-native-simple-dialogs';
 import { TextInput } from 'react-native-paper';
 

@@ -1,10 +1,10 @@
 {
   "expo": {
     "androidStatusBar": {
-      "backgroundColor": "#000000",
+      "backgroundColor": "#FFFFFF",
       "translucent": false
     },
-    "name": "rma",
+    "name": "RMA",
     "slug": "rma",
     "scheme": "your-app-scheme",
     "version": "1.0.0",

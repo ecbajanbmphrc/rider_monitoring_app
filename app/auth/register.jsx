@@ -80,24 +80,6 @@ function RegisterPage({props}){
             .catch(e => {{console.log(e), Alert.alert("Error"), setProgressVisible(false);}}); 
              
             
-            // axios
-            // .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
-             // .then(res => {console.log(res.data)
-
-            // if(res.data.status == 200){
-            //   Alert.alert("Registered Successfully!");
-            //   router.replace('auth/login');
-            //  }else{    
-            //   Alert.alert("Account creation failed",JSON.stringify(res.data.data), [
-            //     {
-            //         text: 'OK'
-            //     }
-            //   ]);
-            //  }
-             
-
-            // })
-            // .catch(e => console.log(e));
             
         }
         else{
