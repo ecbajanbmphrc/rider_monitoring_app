@@ -44,7 +44,7 @@ function  ParcelImageScreenshot({props}){
                             <Image
                            
                             style={{width: smallerSize, height: 500, margin: 25}}
-                            defaultSource={require('../../assets/no-network-256.png')}
+                            // defaultSource={require('../../assets/no-network-256.png')}
                             source={{uri: screenshot}}
                           
                             />

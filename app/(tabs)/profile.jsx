@@ -41,7 +41,7 @@ const ProfileScreen = () => {
   );
 
  return (
-
+  <ScrollView>
     <View style={styles.viewStyle}>
      <View  style={{alignItems:"center"}}>
       <Avatar.Image
@@ -86,6 +86,7 @@ const ProfileScreen = () => {
        />
       </View>   
     </View>   
+    </ScrollView>
   );
 
 }

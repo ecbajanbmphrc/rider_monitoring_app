@@ -125,11 +125,10 @@ function AttendanceScreen() {
 
   async function handleAttendanceTimeInSubmit(){
     const data = await AsyncStorage.getItem('email');
-
    
     try{
     let { status } = await Location.requestForegroundPermissionsAsync();
-    setProgressVisible(true) 
+      setProgressVisible(true) 
       if(status !== 'granted'){
           console.log("Please grant location permissions");
           setProgressVisible(false) 
@@ -174,7 +173,7 @@ function AttendanceScreen() {
 
       if(res.data.status == 200){
         setProgressVisible(false) 
-        Alert.alert("Attendance recorded successfully!");
+        Alert.alert("Success","Attendance recorded successfully!");
         onRefresh();
         setStatus('time_out')
        }else{    
@@ -199,12 +198,38 @@ function AttendanceScreen() {
 
 
   async function handleAttendanceTimeOutSubmit(){
+    const email = await AsyncStorage.getItem('email');
 
 
-    if(!assignedParcel || assignedParcel === 0 ) return Alert.alert('Unable to proceed', 'Please input assigned parcels')
+    setProgressVisible(true)
+
+    await axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
+    .then(
+      async res => {
+       
+        if(res.data.data[0].parcel.length > 0){
+       
+
+        const dataLength = res.data.data[0].parcel.length
+        
+
+        if(res.data.data[0].parcel[dataLength-1].weekday !== res.data.weekday){
+          Alert.alert("Attendance creation failed", "Please input your total parcels!")
+          setProgressVisible(false) 
+          return
+        }
+       
+      }
+      setProgressVisible(false) 
+      })
+    .catch(e => {
+      setProgressVisible(false) 
+      console.log(e);
+    })  
+  
    
     try{
-      setProgressVisible(true)
+    
     let { status } = await Location.requestForegroundPermissionsAsync();
     if(status !== 'granted'){
        setProgressVisible(false)
@@ -249,10 +274,10 @@ function AttendanceScreen() {
 
       if(res.data.status == 200){
         setProgressVisible(false) 
-        Alert.alert("Attendance recorded successfully!");
+        Alert.alert("Success","Attendance recorded successfully!");
         onRefresh();
         setAssignedParcel('')
-        setTimeOutConfirmation(false)
+        // setTimeOutConfirmation(false)
         setStatus('done')
        }else{   
         setProgressVisible(false)  
@@ -428,7 +453,7 @@ function AttendanceScreen() {
      <View style={styles.button}>
      <TouchableOpacity   
       style={styles.timeButton}
-      onPress={() => setTimeOutConfirmation(true)}
+      onPress={() => handleAttendanceTimeOutSubmit()}
      >
     <View>
      <Text style={styles.textSign}>

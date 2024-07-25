@@ -94,7 +94,7 @@ function  ParcelInput({props}){
     async function handleSubmit(){
 
         if(parseInt(totalParcel) < 1){
-            Alert.alert("Unable to proceed","Please input your parcel!", [
+            Alert.alert("Unable to proceed","Please input your delivered parcel!", [
                 {
                     text: 'OK'
                 }
@@ -127,14 +127,16 @@ function  ParcelInput({props}){
         }
 
         const data = await AsyncStorage.getItem('id');
-        const email = await AsyncStorage.getItem('email');      
+        const email = await AsyncStorage.getItem('email');    
+        
+ 
         
         const fd = new FormData()
 
         fd.append('user' , data)
         fd.append('email' , email)
-        fd.append('parcel_non_bulk_count', parcelNonBulk)
-        fd.append('parcel_bulk_count', parcelBulk)
+        fd.append('parcel_non_bulk_count', parcelNonBulk?  parcelNonBulk : 0)
+        fd.append('parcel_bulk_count', parcelBulk? parcelBulk : 0)
         fd.append('assigned_parcel_count', assignedParcel)
         fd.append('screenshot', screenshot)
         fd.append('total_parcel', totalParcel)
@@ -145,7 +147,7 @@ function  ParcelInput({props}){
             ); });
 
 
-
+            
         Alert.alert('Confirmation:', 'You are about to input your parcel!', [
             {
               text: 'Cancel',

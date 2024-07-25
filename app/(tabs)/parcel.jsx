@@ -122,6 +122,7 @@ function ParcelScreen() {
       }
       })
     .catch(e => {
+      setInputNow(true)
       console.log(e);
     })  
   }
