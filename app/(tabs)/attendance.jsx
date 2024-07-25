@@ -124,7 +124,7 @@ function AttendanceScreen() {
   }, [])
 
   async function handleAttendanceTimeInSubmit(){
-    const data = await AsyncStorage.getItem('email');
+    var currentLocation;
    
     try{
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -135,7 +135,7 @@ function AttendanceScreen() {
           return;
       }
 
-      var currentLocation = await Location.getCurrentPositionAsync({});
+     currentLocation = await Location.getCurrentPositionAsync({});
     }catch{
       setProgressVisible(false) 
     }
@@ -200,10 +200,12 @@ function AttendanceScreen() {
   async function handleAttendanceTimeOutSubmit(){
     const email = await AsyncStorage.getItem('email');
 
+    
+
 
     setProgressVisible(true)
 
-    await axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
+    const parcelCheck = await axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
     .then(
       async res => {
        
@@ -214,18 +216,36 @@ function AttendanceScreen() {
         
 
         if(res.data.data[0].parcel[dataLength-1].weekday !== res.data.weekday){
-          Alert.alert("Attendance creation failed", "Please input your total parcels!")
-          setProgressVisible(false) 
-          return
+        
+          return false
         }
        
+      }else{
+
+        setProgressVisible(false) 
+        return false
       }
-      setProgressVisible(false) 
+      
+
       })
     .catch(e => {
-      setProgressVisible(false) 
+      setProgressVisible(false)
       console.log(e);
-    })  
+      return "error"
+    });  
+
+
+    if(parcelCheck === false){
+      Alert.alert("Attendance creation failed", "Please input your total parcels!")
+      setProgressVisible(false) 
+      return
+    }
+
+    if(parcelCheck === "error"){
+      Alert.alert("Attendance creation failed", "Network error!")
+      setProgressVisible(false) 
+      return
+    }
   
    
     try{
