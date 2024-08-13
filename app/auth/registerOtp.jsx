@@ -39,7 +39,7 @@ function RegisterOtp({navigation}){
       console.log("Success");
       setProgressVisible(true);
       axios
-        .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
+        .post("http://192.168.50.139:8082/register-user-detail", userData)
         .then(res => {console.log(res.data)
 
           if(res.data.status == 200){

@@ -53,7 +53,7 @@ function RegisterPage({props}){
             if(password !== confirmPassword)  return  Alert.alert('Password does not match')
             setProgressVisible(true);
             axios
-            .post("https://rider-monitoring-app-backend.onrender.com/send-otp-register", userData)
+            .post("http://192.168.50.139:8082/send-otp-register", userData)
             .then(res => {
 
             if(res.data.status == 200){

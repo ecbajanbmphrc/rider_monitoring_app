@@ -63,9 +63,10 @@ function ParcelScreen() {
 
       <View style={{marginLeft:10}}>
 
-            <Text style={styles.title}>{item.weekday}</Text> 
-            <Text style={styles.item}>Non-Bulk : {item.parcel_non_bulk_count}   Bulk : {item.parcel_bulk_count}    Total : {item.total_parcel}</Text>
-            <Text style={styles.item}>Assigned : {item.assigned_parcel_count}   Remaining : {item.remaining_parcel}</Text>
+            <Text style={styles.title}>{item.weekday}</Text>
+            <Text style={styles.item}>Assigned -    Non-Bulky : {item.assigned_parcel_non_bulk_count}    Bulky : {item.assigned_parcel_bulk_count}    Total : {item.assigned_parcel_total}</Text> 
+            <Text style={styles.item}>Delivered -    Non-Bulky : {item.delivered_parcel_non_bulk_count}    Bulky : {item.delivered_parcel_bulk_count}    Total : {item.delivered_parcel_total}</Text>
+            <Text style={styles.item}>On-Hold : {item.remaining_parcel}</Text>
             <View style={{width: '40%',  alignItems: 'center', flexDirection: 'row', marginTop: 10}} paddingHorizontal={true}> 
               <TouchableOpacity style={styles.itemButtonR} onPress={() => {   handleViewReceipt(item.receipt) }}>
        
@@ -90,6 +91,8 @@ function ParcelScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      
+
 
       retrieveParcelData();
     },[])
@@ -100,7 +103,8 @@ function ParcelScreen() {
 
     const email = await AsyncStorage.getItem('email');
     
-    axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
+    
+    axios.post("http://192.168.50.139:8082/retrieve-parcel-input", {user: email})
     .then(
       async res => {
        
@@ -118,6 +122,8 @@ function ParcelScreen() {
           setInputNow(true)
         }
       }else{
+        // console.log(res.data.data[0].parcel.length);
+        setRetrieveData(res.data.data[0].parcel);
         setInputNow(false)
       }
       })

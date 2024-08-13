@@ -16,6 +16,7 @@ const ProfileScreen = () => {
  const[lastName, setLastName] = useState("last name");
  const[phoneNumber, setPhoneNumber] = useState("phone number");
  const[email, setEmail] = useState("email");
+ const[address, setAddress] = useState("address");
 
  async function getData(){
  
@@ -24,12 +25,14 @@ const ProfileScreen = () => {
   const a_middleName = await AsyncStorage.getItem('middle_name');
   const a_lastName = await AsyncStorage.getItem('last_name');
   const a_phoneNumber = await AsyncStorage.getItem('phone_number');
+  const a_address = await AsyncStorage.getItem('address');
 
   setEmail(a_email);
   setFirstName(a_firstName);
   setMiddleName(a_middleName);
   setLastName(a_lastName);
   setPhoneNumber(a_phoneNumber);
+  setAddress(a_address);
 
 
  }
@@ -41,7 +44,7 @@ const ProfileScreen = () => {
   );
 
  return (
-  <ScrollView>
+  <ScrollView style={{backgroundColor: 'white'}}>
     <View style={styles.viewStyle}>
      <View  style={{alignItems:"center"}}>
       <Avatar.Image
@@ -76,6 +79,12 @@ const ProfileScreen = () => {
        <TextInput
         mode="outlined"
         value = {phoneNumber}
+        editable = {false}      
+       />
+       <Text style={styles.textStyle}>Address:</Text> 
+       <TextInput
+        mode="outlined"
+        value = {address}
         editable = {false}      
        />
        <Text style={styles.textStyle}>Email:</Text> 

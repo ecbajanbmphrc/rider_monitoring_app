@@ -63,20 +63,15 @@ function DashboardScreen({navigation}) {
     return () => backHandler.remove();
   }, []);
 
-  function testTry(){
-    console.log("test");
-  }
 
   async function retrieveDashboardData(){
 
     const email = await AsyncStorage.getItem('email');
     const dateToday = new Date().toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'});
     
-    axios.post("https://rider-monitoring-app-backend.onrender.com/get-user-data-dashboard", {email: email , date : dateToday})
+    axios.post("http://192.168.50.139:8082/get-user-data-dashboard", {email: email , date : dateToday})
     .then(
       async res => {
-       
-        // setRetrieveData( res.data.data[0].parcel);
     
         const data = await res.data;
 
@@ -101,9 +96,10 @@ function DashboardScreen({navigation}) {
       if(res.data.status === 200){
 
         if(data.data.length !== 0){
-          setTotalBulk(res.data.data[0].parcel_bulk_count)
-          setTotalNonBulk(res.data.data[0].parcel_non_bulk_count)
-          setTotalParcel(res.data.data[0].total_parcel)
+          console.log(res.data.data[0])
+          setTotalBulk(res.data.data[0].delivered_parcel_bulk_count)
+          setTotalNonBulk(res.data.data[0].delivered_parcel_non_bulk_count)
+          setTotalParcel(res.data.data[0].delivered_parcel_total)
 
     
          data.userParcelPerDay.map((data, key) => {
@@ -293,7 +289,7 @@ const styles = StyleSheet.create({
       // flex: 1,
       marginVertical: 25,
       flexDirection: 'column',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: 'transparent',
     },
     logo: {
       height: 90,

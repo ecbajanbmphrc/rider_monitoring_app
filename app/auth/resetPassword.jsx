@@ -34,7 +34,7 @@ function ResetPasswordScreen({navigation}) {
           if(password !== confirmPassword)  return  Alert.alert('Password does not match')
           setProgressVisible(true);
           axios
-          .put("https://rider-monitoring-app-backend.onrender.com/forgot-password-reset", userData)
+          .put("http://192.168.50.139:8082/forgot-password-reset", userData)
           .then(res => {
 
           if(res.data.status == 200){
