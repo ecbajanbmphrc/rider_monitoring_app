@@ -1,6 +1,6 @@
 const {View, Text,Image, TouchableOpacity, ScrollView, Alert, StyleSheet} = require('react-native');
 import styles from '../auth/style';
-import { TextInput } from 'react-native-paper';
+import { Card, TextInput } from 'react-native-paper';
 import { useState } from 'react';
 import { CheckBox } from '@rneui/themed';
 import * as React from "react";
@@ -24,7 +24,6 @@ function  ParcelInput({props}){
     const [parcelNonBulkVerify, setParcelNonBulkVerify] = useState(false);
     const [parcelBulk, setParcelBulk] = useState('');
     const [parcelBulkVerify, setParcelBulkVerify] = useState(false);
-    const [assignedParcel, setAssignedParcel] = useState('');
     const [assignedParcelVerify, setAssignedParcelVerify] = useState(false);
     const [receipt, setReceipt] = useState([]);
     const [viewReceipt, setViewReceipt] = useState([]);
@@ -32,6 +31,18 @@ function  ParcelInput({props}){
     const [viewScreenshot, setViewScreenshot] = useState(null);
     const [remainingParcel, setRemainingParcel] = useState('0');
     const [totalParcel, setTotalParcel] = useState('0');
+
+    const [assignedParcelNonBulk, setAssignedParcelNonBulk] = useState('');
+    const [assignedParcelNonBulkVerify, setAssignedParcelNonBulkVerify] = useState(false);
+    const [assignedParcelBulk, setAssignedParcelBulk] = useState('');
+    const [assignedParcelBulkVerify, setAssignedParcelBulkVerify] = useState(false);
+    const [assignedParcelTotal, setAssignedParcelTotal] = useState('0');
+
+    const [deliveredParcelNonBulk, setDeliveredParcelNonBulk] = useState('');
+    const [deliveredParcelNonBulkVerify, setDeliveredParcelNonBulkVerify] = useState(false);
+    const [deliveredParcelBulk, setDeliveredParcelBulk] = useState('');
+    const [deliveredParcelBulkVerify, setDeliveredParcelBulkVerify] = useState(false);
+    const [deliveredParcelTotal, setDeliveredParcelTotal] = useState('0');
 
     const pickImageReceipt = async () => {
         let imageList = [];
@@ -41,7 +52,7 @@ function  ParcelInput({props}){
           allowsMultipleSelection: true,
           base64: true,
         //   aspect: [4, 3],
-          quality: 0.1,
+          quality: 0.5,
           selectionLimit: 5
         });
 
@@ -63,6 +74,8 @@ function  ParcelInput({props}){
             setViewReceipt(viewImageList);
             setReceipt(imageList);
         }
+
+        console.log(width)
     };
 
 
@@ -93,8 +106,32 @@ function  ParcelInput({props}){
 
     async function handleSubmit(){
 
-        if(parseInt(totalParcel) < 1){
+        if(parseInt(assignedParcelTotal) < 1){
+            Alert.alert("Unable to proceed","Please input your assigned parcel!", [
+                {
+                    text: 'OK'
+                }
+              ]);
+            return
+        }
+        else if(parseInt(deliveredParcelTotal) < 1){
             Alert.alert("Unable to proceed","Please input your delivered parcel!", [
+                {
+                    text: 'OK'
+                }
+              ]);
+            return
+        }
+        else if(parseInt(deliveredParcelNonBulk) > parseInt(assignedParcelNonBulk)){
+            Alert.alert("Unable to proceed","Delivered Non-Bulky must not be greater than assigned Non-Bulky!", [
+                {
+                    text: 'OK'
+                }
+              ]);
+            return
+        }
+        else if(parseInt(deliveredParcelBulk) > parseInt(assignedParcelBulk)){
+            Alert.alert("Unable to proceed","Delivered Bulky must not be greater than assigned Bulky!", [
                 {
                     text: 'OK'
                 }
@@ -110,21 +147,41 @@ function  ParcelInput({props}){
             return 
         }
         else if(viewReceipt.length === 0){
-            Alert.alert("Unable to proceed","Please input your photo of remittance receipt!", [
+            Alert.alert("Unable to proceed","Please input your photo of remittance's receipt!", [
                 {
                     text: 'OK'
                 }
               ]);
             return  
         }
-        else if (viewScreenshot === null){
-            Alert.alert("Unable to proceed","Please input your screnshot of daily delivered parcel!", [
+        else if(viewScreenshot === null){
+            Alert.alert("Unable to proceed","Please input your screenshot in SPX app!", [
                 {
                     text: 'OK'
                 }
               ]);
             return  
         }
+
+
+        if((parseInt(deliveredParcelNonBulk? deliveredParcelNonBulk: 0) > 0) && (parseInt(assignedParcelNonBulk? assignedParcelNonBulk : 0) === 0) ){
+            Alert.alert("Unable to proceed","You don't have assigned non-bulky parcel!", [
+                {
+                    text: 'OK'
+                }
+              ]);
+            return    
+        }
+        else if((parseInt(deliveredParcelBulk? deliveredParcelBulk: 0) > 0) && (parseInt(assignedParcelBulk? assignedParcelBulk : 0) === 0 )){
+            Alert.alert("Unable to proceed","You don't have assigned bulky parcel!", [
+                {
+                    text: 'OK'
+                }
+              ]);
+            return    
+        }
+    
+
 
         const data = await AsyncStorage.getItem('id');
         const email = await AsyncStorage.getItem('email');    
@@ -135,16 +192,20 @@ function  ParcelInput({props}){
 
         fd.append('user' , data)
         fd.append('email' , email)
-        fd.append('parcel_non_bulk_count', parcelNonBulk?  parcelNonBulk : 0)
-        fd.append('parcel_bulk_count', parcelBulk? parcelBulk : 0)
-        fd.append('assigned_parcel_count', assignedParcel)
-        fd.append('screenshot', screenshot)
-        fd.append('total_parcel', totalParcel)
+        fd.append('assigned_parcel_non_bulk_count', assignedParcelNonBulk? assignedParcelNonBulk : 0)
+        fd.append('assigned_parcel_bulk_count', assignedParcelBulk? assignedParcelBulk : 0)
+        fd.append('assigned_parcel_total', assignedParcelTotal)
+        fd.append('delivered_parcel_non_bulk_count', deliveredParcelNonBulk?  deliveredParcelNonBulk : 0)
+        fd.append('delivered_parcel_bulk_count', deliveredParcelBulk? deliveredParcelBulk : 0)
+        fd.append('delivered_parcel_total', deliveredParcelTotal)
         fd.append('remaining_parcel', remainingParcel)
+        fd.append('screenshot', screenshot)
         receipt.forEach(receipt => {
             fd.append(
                 "receipt",receipt
             ); });
+
+           
 
 
             
@@ -158,7 +219,7 @@ function  ParcelInput({props}){
             {
             setProgressVisible(true)    
             axios
-            .post("https://rider-monitoring-app-backend.onrender.com/parcel-input", fd)
+            .post("http://192.168.50.139:8082/parcel-input", fd)
             .then(res => {
              
        
@@ -186,58 +247,101 @@ function  ParcelInput({props}){
         
     }
 
-
-    function handleBulkParcel(e){
+    function handleAssignedParcelNonBulk(e){
         const textVar = e.nativeEvent.text;
-        setParcelBulk(textVar);
-        setParcelBulkVerify(false);
-        if(remainingParcel !== '') setRemainingParcel((handleRemainingParcel(assignedParcel? assignedParcel: 0, parcelNonBulk? parcelNonBulk : 0, textVar? textVar : 0)).toString());
-        setTotalParcel((handleTotalParcel(  parcelNonBulk?  parcelNonBulk: 0, textVar? textVar: 0)).toString());
-        if(/([0-9])/.test(textVar)){
-            setParcelBulk(textVar)
-            setParcelBulkVerify(true);
+        setAssignedParcelNonBulk(textVar)
+        setAssignedParcelNonBulkVerify(false);
+        setAssignedParcelTotal(handleAssignedParcelTotal( textVar? textVar: 0, assignedParcelBulk? assignedParcelBulk: 0 ).toString());
+        if(deliveredParcelTotal > 1){
+            setRemainingParcel(handleRemainingParcel(deliveredParcelNonBulk? deliveredParcelNonBulk : 0, deliveredParcelBulk? deliveredParcelBulk : 0,  textVar? textVar : 0, assignedParcelBulk? assignedParcelBulk : 0).toString())
+            }else{setRemainingParcel('0')}
+        if(/\d+$/.test(textVar)){
+            setAssignedParcelNonBulkVerify(true);
         }
-
-        
-    }
-
-    function handleNonBulkParcel(e){
-        const textVar = e.nativeEvent.text;
-        setParcelNonBulk(textVar);
-        setParcelNonBulkVerify(false);
-        if(remainingParcel !== '') setRemainingParcel((handleRemainingParcel(assignedParcel? assignedParcel: 0, textVar? textVar : 0, parcelBulk? parcelBulk : 0)).toString());
-        setTotalParcel((handleTotalParcel( textVar? textVar: 0, parcelBulk? parcelBulk : 0)).toString());
-        if(/([0-9])/.test(textVar)){
-            setParcelNonBulk(textVar)
-            setParcelNonBulkVerify(true);
-        }
-    }
-
-    function handleAssignedParcel(e){
-        const textVar = e.nativeEvent.text;
-        setAssignedParcel(textVar)
-        setAssignedParcelVerify(false)
-
-        if(totalParcel >= 1) setRemainingParcel((handleRemainingParcel(textVar? textVar: 0, parcelNonBulk? parcelNonBulk : 0, parcelBulk? parcelBulk : 0)).toString());
-     
-        if(/([1-9])/.test(textVar)){
-            
-            setAssignedParcel(textVar)
-            setAssignedParcelVerify(true);
        
-        }
-    }
-
-
-    function handleRemainingParcel(assignedParcel, parcelNonBulk, parcelBulk){
-
-            return parseInt(assignedParcel) - (parseInt(parcelNonBulk) + parseInt(parcelBulk))
         
     }
 
-    function handleTotalParcel(parcelNonBulk, parcelBulk){
 
-        return(parseInt(parcelBulk) + parseInt(parcelNonBulk))
+    function handleAssignedParcelBulk(e){
+        const textVar = e.nativeEvent.text;
+        setAssignedParcelBulk(textVar);
+        setAssignedParcelBulkVerify(false);
+        setAssignedParcelTotal((handleAssignedParcelTotal( assignedParcelNonBulk? assignedParcelNonBulk: 0, textVar? textVar: 0  )).toString());
+        if(deliveredParcelTotal > 1){
+            setRemainingParcel((handleRemainingParcel(deliveredParcelNonBulk? deliveredParcelNonBulk : 0, deliveredParcelBulk? deliveredParcelBulk : 0, assignedParcelNonBulk? assignedParcelNonBulk : 0, textVar? textVar : 0)).toString());
+            }else{setRemainingParcel('0')}
+
+        if(/([0-9])/.test(textVar)){
+            setAssignedParcelBulkVerify(true);
+        }
+
+        
+    }
+
+
+    function handleDeliveredParcelNonBulk(e){
+        const textVar = e.nativeEvent.text;
+        setDeliveredParcelNonBulk(textVar);
+        setDeliveredParcelNonBulkVerify(false);
+        setDeliveredParcelTotal((handleDeliveredParcelTotal( textVar? textVar: 0, deliveredParcelBulk? deliveredParcelBulk: 0)).toString());
+        if(assignedParcelTotal > 1){ 
+            setRemainingParcel((handleRemainingParcel(textVar? textVar : 0, deliveredParcelBulk? deliveredParcelBulk : 0, assignedParcelNonBulk? assignedParcelNonBulk : 0, assignedParcelBulk? assignedParcelBulk : 0)).toString());
+        }else{setRemainingParcel('0')}
+
+        if(/([0-9])/.test(textVar)){
+            setDeliveredParcelNonBulkVerify(true);
+        }
+
+        
+    }
+
+
+    function handleDeliveredParcelBulk(e){
+        const textVar = e.nativeEvent.text;
+        setDeliveredParcelBulk(textVar);
+        setDeliveredParcelBulkVerify(false);
+        setDeliveredParcelTotal((handleDeliveredParcelTotal( deliveredParcelNonBulk? deliveredParcelNonBulk: 0 , textVar? textVar: 0, )).toString());
+        if(assignedParcelTotal > 1){
+            setRemainingParcel((handleRemainingParcel(deliveredParcelNonBulk? deliveredParcelNonBulk : 0, textVar? textVar : 0, assignedParcelNonBulk? assignedParcelNonBulk : 0, assignedParcelBulk? assignedParcelBulk : 0)).toString());
+        }else{setRemainingParcel('0')}    
+
+            if(/([0-9])/.test(textVar)){
+            setDeliveredParcelBulkVerify(true);
+        }
+
+        
+    }
+
+
+
+
+    function handleRemainingParcel(deliveredParcelNonBulk, deliveredParcelBulk, assignedParcelNonBulk, assignedParcelBulk){
+            const value = (parseInt(assignedParcelNonBulk) + parseInt(assignedParcelBulk)) - (parseInt(deliveredParcelNonBulk) + parseInt(deliveredParcelBulk))
+           
+            if(value.toString() === "NaN") return 0
+            
+            return value
+        
+    }
+
+    function handleAssignedParcelTotal(assignedParcelNonBulk, assignedParcelBulk){
+           
+            const value = parseInt(assignedParcelNonBulk) + parseInt(assignedParcelBulk) 
+            
+            if(value.toString() === "NaN") return 0
+
+            return value
+        
+    }
+
+    function handleDeliveredParcelTotal(deliveredParcelNonBulk, deliveredParcelBulk){
+
+        const value = parseInt(deliveredParcelNonBulk) + parseInt(deliveredParcelBulk)
+
+        if(value.toString() === "NaN") return 0
+
+        return value
         
     }
   
@@ -253,19 +357,21 @@ function  ParcelInput({props}){
                  title="Loading"
                  message="Please, wait..."
                 />
-                
 
-                <View style = {styles.textInputRegistration}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Total Delivered Non-Bulk Parcel :</Text>
+                <View style = {componentStyles.contentPadding}>
+                    <View style={{margin: 10}}>
+                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Assigned Parcel :</Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  
                     <TextInput 
                     mode="outlined"
                     keyboardType='numeric'
-                    placeholder="Enter your total Non-Bulk parcel"
+                    label="Non-Bulky"
                     placeholderTextColor="#76ABAE" 
-                    onChange={e => handleNonBulkParcel(e)}
+                    onChange={e => handleAssignedParcelNonBulk(e)}
                     theme={{ roundness: 8 }}
-                    maxLength={5}
-                    right= { parcelNonBulk.length < 1 ? null : parcelNonBulkVerify ? (
+                    maxLength={11}
+                    right= { assignedParcelNonBulk.length < 1 ? null : assignedParcelNonBulkVerify ? (
                         <TextInput.Icon 
                         color="green"
                         icon="check" />
@@ -274,22 +380,18 @@ function  ParcelInput({props}){
                         color="red"
                         icon="exclamation" />
                     )} 
+                    style={{width: '49%'}}
                        
-                    />                         
-                </View>
-
-
-                <View style = {styles.textInputRegistration}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Total Delivered Bulk Parcel :</Text>
-                    <TextInput 
+                    />  
+                     <TextInput 
                     mode="outlined"
                     keyboardType='numeric'
-                    placeholder="Enter your total Bulk parcel"
                     placeholderTextColor="#76ABAE" 
-                    onChange={e => handleBulkParcel(e)}
+                    label="Bulky"
+                    onChange={e => handleAssignedParcelBulk(e)}
                     theme={{ roundness: 8 }}
                     maxLength={11}
-                    right= { parcelBulk.length < 1 ? null : parcelBulkVerify ? (
+                    right= { assignedParcelBulk.length < 1 ? null : assignedParcelBulkVerify ? (
                         <TextInput.Icon 
                         color="green"
                         icon="check" />
@@ -298,21 +400,46 @@ function  ParcelInput({props}){
                         color="red"
                         icon="exclamation" />
                     )} 
+                    style={{width: '49%' }}
+                    /> 
+                    </View>    
+
+                    <View style={{  marginVertical: 10, marginLeft : '1%', alignContent : 'center'}}>
+                        <View style={{flexDirection:'row'}}>
+                            <Text>Total : </Text>
+                            <TextInput 
+                                mode="outlined"
+                                keyboardType='numeric'
+                                placeholderTextColor="#76ABAE" 
+                                value={assignedParcelTotal}
+                                maxLength={11}
+                                outlineColor='#FFFFFF'
+                                outlineStyle="none"
+                                style={{ backgroundColor: '#FFFFFF', outlineStyle: 'none', height:20}}
+                            readOnly            
+                            /> 
+                        </View>
                        
-                    />                         
+                    </View>   
+                    </View>              
+                   
                 </View>
 
-                <View style = {styles.textInputRegistration}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Total Assigned Parcel :</Text>
+
+                <View style = {componentStyles.contentPadding}>
+                    <View style={{margin: 10}}>
+                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Delivered Parcel :</Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  
                     <TextInput 
                     mode="outlined"
                     keyboardType='numeric'
-                    placeholder="Enter your total assigned parcel"
+                    label="Non-Bulky"
                     placeholderTextColor="#76ABAE" 
-                    onChange={e => handleAssignedParcel(e)}
+                    onChange={e => handleDeliveredParcelNonBulk(e)}
                     theme={{ roundness: 8 }}
                     maxLength={11}
-                    right= { assignedParcel.length < 1 ? null : assignedParcelVerify ? (
+                    right= { deliveredParcelNonBulk.length < 1 ? null : deliveredParcelNonBulkVerify ? (
                         <TextInput.Icon 
                         color="green"
                         icon="check" />
@@ -321,47 +448,68 @@ function  ParcelInput({props}){
                         color="red"
                         icon="exclamation" />
                     )} 
+                    style={{width: '49%'}}
                        
-                    />                         
-                </View>
-
-
-                <View style = {styles.textInputRegistration}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Total Delivered Parcel :</Text>
-                    <TextInput 
+                    />  
+                     <TextInput 
                     mode="outlined"
                     keyboardType='numeric'
                     placeholderTextColor="#76ABAE" 
-                    value={totalParcel}
+                    label="Bulky"
+                    onChange={e => handleDeliveredParcelBulk(e)}
                     theme={{ roundness: 8 }}
                     maxLength={11}
-                    style={{ backgroundColor: '#F3D0D7'}}
-                    readOnly
-                                           
-                    />                         
+                    right= { deliveredParcelBulk.length < 1 ? null : deliveredParcelBulkVerify ? (
+                        <TextInput.Icon 
+                        color="green"
+                        icon="check" />
+                    ) : (
+                        <TextInput.Icon 
+                        color="red"
+                        icon="exclamation" />
+                    )} 
+                    style={{width: '49%' }}
+                    /> 
+                    </View>    
+
+                    <View style={{  marginVertical: 10, marginLeft : '1%', alignContent : 'center'}}>
+                        <View style={{flexDirection:'row'}}>
+                            <Text>Total : </Text>
+                            <TextInput 
+                                mode="outlined"
+                                keyboardType='numeric'
+                                placeholderTextColor="#76ABAE" 
+                                value={deliveredParcelTotal}
+                                maxLength={11}
+                                outlineColor='#FFFFFF'
+                                outlineStyle="none"
+                                style={{ backgroundColor: '#FFFFFF', outlineStyle: 'none', height:20}}
+                            readOnly            
+                            /> 
+
+                            <Text>On Hold : </Text>
+                            <TextInput 
+                                mode="outlined"
+                                keyboardType='numeric'
+                                placeholderTextColor="#76ABAE" 
+                                value={remainingParcel}
+                                maxLength={11}
+                                outlineColor='#FFFFFF'
+                                outlineStyle="none"
+                                style={{ backgroundColor: '#FFFFFF', outlineStyle: 'none', height:20}}
+                            readOnly            
+                            /> 
+                        </View>
+                       
+                    </View>   
+                    </View>              
+                   
                 </View>
 
-
-                
-
-                <View style = {styles.textInputRegistration}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Remaining Parcel :</Text>
-                    <TextInput 
-                    mode="outlined"
-                    keyboardType='numeric'
-                    placeholderTextColor="#76ABAE" 
-                    value={remainingParcel}
-                    theme={{ roundness: 8 }}
-                    maxLength={11}
-                    style={{ backgroundColor: '#F3D0D7'}}
-                    readOnly
-                    />                         
-                </View>
-
-            </View>
-            
+                <View style = {componentStyles.contentPadding}>
+                <View style={{margin: 10}}>
                 <View style={componentStyles.button}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Image of Remittance Receipt :</Text>
+                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Photo of Remittance's Receipt :</Text>
                     <TouchableOpacity 
                     style={componentStyles.loginButton}
                     onPress={pickImageReceipt}
@@ -382,11 +530,11 @@ function  ParcelInput({props}){
                     data={viewReceipt}
                     scrollEnabled={false}
                     renderItem={({ item }) =>(
-                        <View style={{marginVertical:20, marginHorizontal: 10, alignItems : 'center'}}>
+                        <View style={{marginVertical:5, alignItems : 'center' , alignContent : 'center' }}>
                             <Image
                          
                             source={{uri: item}}
-                            style={{width: smallerSize, height: 500}}/>
+                            style={{width: smallerSize, height: 500, borderWidth : 2,   borderColor: '#405D72',}}/>
                         
 
                         </View>
@@ -398,12 +546,19 @@ function  ParcelInput({props}){
                 </View>
                     )
                 }
+                </View>
 
+            </View>    
+
+
+            <View style = {componentStyles.contentPadding}>
+                <View style={{margin: 10}}>
                 <View style={componentStyles.button}>
-                <Text style={{marginBottom: 10, fontWeight:'500'}}>Screenshot of Daily Delivered :</Text>
+                    <Text style={{marginBottom: 10, fontWeight:'500'}}>SPX screenshot :</Text>
                     <TouchableOpacity 
                     style={componentStyles.loginButton}
-                    onPress={pickImageScreenshot}>
+                    onPress={pickImageScreenshot}
+                    >
                         <View>
                         <Icon
                           name="image-plus"
@@ -413,33 +568,35 @@ function  ParcelInput({props}){
                            
                         </View>
                     </TouchableOpacity>
-                    {/* <Image 
-                    style={{height: 100, width: '100%'}}
-                    source={{uri: image}}
-                    /> */}
                 </View>
-
                 {viewScreenshot !== null &&(
-                  <View style={componentStyles.imgPick}>  
-                    <View style={{marginVertical:20, marginHorizontal: 10, alignItems : 'center'}}>
+                <View style={componentStyles.imgPick}>
+                
+                        <View style={{marginTop : 20, marginVertical:5, alignItems : 'center' , alignContent : 'center' }}>
                             <Image
-                           
+                         
                             source={{uri: viewScreenshot}}
-                            style={{width: smallerSize, height: 500}}/>
+                            style={{width: smallerSize, height: 500, borderWidth : 2,   borderColor: '#405D72',}}/>
                         
 
-                    </View>
-                   </View> 
-           
-                 )
+                        </View>
+                         
+                  
+                </View>
+                    )
                 }
+                </View>
+
+            </View>  
+
+            </View>
+            
 
                 <View style={styles.button}>
                     <TouchableOpacity 
                     style={styles.loginButton}
                     onPress={() => {
                        
-                        // router.push({pathname: 'auth/registerOtp'});
                         handleSubmit()
                     }}>
                         <View>
@@ -458,20 +615,19 @@ const componentStyles = StyleSheet.create({
    
     button: {
         alignItems: 'center',
-        marginTop: -20,
-        marginBottom: 30,
+     
+     
         textAlign: 'center',
-        margin: 20,
+    
+        borderColor: '#FF4E88',
     },
 
     imgPick: {
         alignItems: 'center',
-        marginTop: -20,
-        marginBottom: 30,
-        textAlign: 'center',
-        margin: 20,
-        borderColor: 'black',
-        borderWidth: 2
+        alignContent: 'center',
+        marginTop: 1,
+        marginBottom: 1,
+           // margin: 20,
     },
 
     loginButton: {
@@ -491,6 +647,15 @@ const componentStyles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
     },
+
+    contentPadding: {
+        paddingTop: 10,
+        paddingBottom: 1,
+        borderColor: '#FF4E88',
+        borderWidth : 3,
+        marginVertical: 10
+        
+    }
 
 
 

@@ -41,7 +41,7 @@ function AttendanceScreen() {
 
   setUserEmail(data);
   
-  axios.get( "https://rider-monitoring-app-backend.onrender.com/retrieve-user-attendance" ,  {params: {user: data}})
+  axios.get( "http://192.168.50.139:8082/retrieve-user-attendance" ,  {params: {user: data}})
   .then(
 
   async res => {
@@ -60,23 +60,35 @@ function AttendanceScreen() {
   else if (res.data.status === 200){
     if(!res.data.data.time_out){
       setConnection(true)
-      const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
-      const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+      try{
+        const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
+        const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;  
+        setTimeInAddress(time_in_city_and_street);
+      }catch{
+        setTimeInAddress("-----")
+      }
       setTimeIn(res.data.data.time_in);
-      setTimeInAddress(time_in_city_and_street);
       setStatus('time_out')
     }else{
-      setConnection(true)
+      setConnection(true)   
 
-      const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
-      const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+      try{
+        
+        const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
+        const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+        setTimeInAddress(time_in_city_and_street);
+
+        const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
+        const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
+        setTimeOutAddress(time_out_city_and_street);
+
+      }catch{
+        setTimeInAddress("-----")
+        setTimeOutAddress("-----");
+      }
       setTimeIn(res.data.data.time_in);
-      setTimeInAddress(time_in_city_and_street);
-
       setTimeOut(res.data.data.time_out);
-      const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
-      const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
-      setTimeOutAddress(time_out_city_and_street);
+     
       setStatus('done') 
 
     }
@@ -167,7 +179,7 @@ function AttendanceScreen() {
         {
         setProgressVisible(true)  ,  
       axios
-      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-in", attendanceData)
+      .put("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
       .then(res => {console.log(res.data)
         console.log('your longitude is',longitude);
 
@@ -203,7 +215,7 @@ function AttendanceScreen() {
 
     setProgressVisible(true)
 
-    await axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
+    await axios.post("http://192.168.50.139:8082/retrieve-parcel-input", {user: email})
     .then(
       async res => {
        
@@ -269,7 +281,7 @@ function AttendanceScreen() {
        {
         setProgressVisible(true) 
        axios
-      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-out", attendanceData)
+      .put("http://192.168.50.139:8082/attendance-input-time-out", attendanceData)
       .then(res => {console.log(res.data)
 
       if(res.data.status == 200){

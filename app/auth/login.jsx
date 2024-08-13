@@ -46,9 +46,10 @@ function LoginPage({navigation}){
       if(!passwordVerify) return Alert.alert('Please input your password!');
       
        setProgressVisible(true)
-      axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
+      axios.post("http://192.168.50.139:8082/login-user", userData)
         .then(
         res => {
+            console.log(res.data)
         if(res.data.status === 200){
             // <ProgressDialog visible={false} />  
          
@@ -61,6 +62,7 @@ function LoginPage({navigation}){
             AsyncStorage.setItem('middle_name', res.data.middle_name);
             AsyncStorage.setItem('last_name', res.data.last_name);
             AsyncStorage.setItem('phone_number', res.data.phone);
+            AsyncStorage.setItem('address', res.data.address);
             AsyncStorage.setItem('id', res.data.id);
             setEmail('');
             setPassword(''); 
