@@ -2,17 +2,15 @@ const {View, Text,Image, TouchableOpacity, ScrollView, Alert, StyleSheet} = requ
 import styles from '../auth/style';
 import { Card, TextInput } from 'react-native-paper';
 import { useState } from 'react';
-import { CheckBox } from '@rneui/themed';
 import * as React from "react";
 import axios from 'axios';
 import { useRouter} from 'expo-router';
 import { ProgressDialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-// import { launchImageLibrary } from 'react-native-image-picker';
-// import * as ImagePicker from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { FlatList, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 
 
 
@@ -184,7 +182,28 @@ function  ParcelInput({props}){
 
 
         const data = await AsyncStorage.getItem('id');
-        const email = await AsyncStorage.getItem('email');    
+        const email = await AsyncStorage.getItem('email');   
+        
+        
+        try{
+    
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if(status !== 'granted'){
+               setProgressVisible(false)
+                console.log("Please grant location permissions");
+                return;
+            }
+        
+            var currentLocation = await Location.getCurrentPositionAsync({});
+           }catch{
+              setProgressVisible(false)
+           }
+              setProgressVisible(false)
+
+            const time_out_coordinates = {
+                latitude: currentLocation.coords.latitude,
+                longitude: currentLocation.coords.longitude
+              }
         
  
         
@@ -200,6 +219,7 @@ function  ParcelInput({props}){
         fd.append('delivered_parcel_total', deliveredParcelTotal)
         fd.append('remaining_parcel', remainingParcel)
         fd.append('screenshot', screenshot)
+        fd.append('time_out_coordinates', JSON.stringify(time_out_coordinates))
         receipt.forEach(receipt => {
             fd.append(
                 "receipt",receipt
@@ -226,7 +246,6 @@ function  ParcelInput({props}){
             if(res.data.status == 200){
                 setProgressVisible(false)    
                 Alert.alert("Success!","Parcel recorded successfully.");
-                // router.replace('/(tabs)/dashboard');
                 router.back();
             
              }else{    
@@ -554,7 +573,7 @@ function  ParcelInput({props}){
             <View style = {componentStyles.contentPadding}>
                 <View style={{margin: 10}}>
                 <View style={componentStyles.button}>
-                    <Text style={{marginBottom: 10, fontWeight:'500'}}>SPX screenshot :</Text>
+                    <Text style={{marginBottom: 10, fontWeight:'500'}}>Order statistics screenshot :</Text>
                     <TouchableOpacity 
                     style={componentStyles.loginButton}
                     onPress={pickImageScreenshot}
@@ -591,7 +610,6 @@ function  ParcelInput({props}){
 
             </View>
             
-
                 <View style={styles.button}>
                     <TouchableOpacity 
                     style={styles.loginButton}

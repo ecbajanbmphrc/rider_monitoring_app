@@ -10,10 +10,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 
+
+// Default values shown  
+
+
+// Default values shown
+
+
+
 function DashboardScreen({navigation}) {
   
 
-
+  
   const [totalParcel, setTotalParcel] = useState(0);
   const [totalBulk, setTotalBulk] = useState(0);
   const [totalNonBulk, setTotalNonBulk] = useState(0);
@@ -162,6 +170,7 @@ function DashboardScreen({navigation}) {
           {isLoading?
             <View style={{alignItems: 'center', marginVertical: '75%'}}>
               <Image style={styles.logo} source = {require('../../assets/dual_ball_loading.gif')}/>
+       
             </View>
             :
             <View>

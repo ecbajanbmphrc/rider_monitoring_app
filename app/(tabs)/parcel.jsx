@@ -173,21 +173,6 @@ function ParcelScreen() {
        )
       }
 
-   
-       {inputNow?
-       <></>
-       :
-       <TouchableOpacity
-       style={styles.circle}
-       onPress={() => {
-         handlePopUpModal()
-         }}
-       >
-        <Icon name='package-variant-closed' size={30} color="#FFFFFF"/> 
-           
-      </TouchableOpacity>
-     
-        }
       </View>
      </BottomSheetModalProvider>
         

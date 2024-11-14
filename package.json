@@ -26,6 +26,7 @@
     "expo": "~50.0.14",
     "expo-build-properties": "~0.11.1",
     "expo-constants": "~15.4.6",
+    "expo-image-picker": "~14.7.1",
     "expo-linking": "~6.2.2",
     "expo-location": "~16.5.5",
     "expo-router": "~3.4.10",
@@ -44,8 +45,7 @@
     "react-native-select-dropdown": "^4.0.1",
     "react-native-simple-dialogs": "^2.1.0",
     "react-native-splash-screen": "^3.3.0",
-    "react-native-svg": "^15.1.0",
-    "expo-image-picker": "~14.7.1"
+    "react-native-svg": "^15.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
