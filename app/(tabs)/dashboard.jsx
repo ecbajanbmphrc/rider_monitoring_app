@@ -69,7 +69,7 @@ function DashboardScreen({navigation}) {
     const email = await AsyncStorage.getItem('email');
     const dateToday = new Date().toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'});
     
-    axios.post("http://192.168.50.139:8082/get-user-data-dashboard", {email: email , date : dateToday})
+    axios.post("https://rider-monitoring-app-backend.onrender.com/get-user-data-dashboard", {email: email , date : dateToday})
     .then(
       async res => {
     

@@ -33,7 +33,7 @@ function ForgotPasswordScreen({navigation}) {
 
            setProgressVisible(true);
            axios
-            .post("http://192.168.50.139:8082/send-otp-forgot-password", userData)
+            .post("https://rider-monitoring-app-backend.onrender.com/send-otp-forgot-password", userData)
             .then(res => {
 
             if(res.data.status == 200){
