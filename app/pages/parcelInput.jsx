@@ -219,7 +219,7 @@ function  ParcelInput({props}){
             {
             setProgressVisible(true)    
             axios
-            .post("http://192.168.50.139:8082/parcel-input", fd)
+            .post("https://rider-monitoring-app-backend.onrender.com/parcel-input", fd)
             .then(res => {
              
        

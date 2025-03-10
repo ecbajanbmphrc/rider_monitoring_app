@@ -7,30 +7,36 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
-import { ProgressDialog, ConfirmDialog } from 'react-native-simple-dialogs';
+import { ProgressDialog, ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import { TextInput } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as ImagePicker from 'expo-image-picker';
+import { useWindowDimensions } from 'react-native';
+import { useRouter } from "expo-router";
 
 
 
-function AttendanceScreen() {
+function AttendanceScreen() {setInputTimeInModal
 
   
-
+  const router = useRouter();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [userEmail, setUserEmail] = useState('');
   const [timeIn, setTimeIn] = useState('-----');
   const [timeOut, setTimeOut] = useState('-----');
   const [status, setStatus] = useState('');
   const [connection, setConnection] = useState(true);
+  const { width } = useWindowDimensions();
+  const smallerSize = width - width *.20;
 
-  const [test, setTest] = useState('');
-  const [longitude , setLongitude] = useState('');
-  const [latitude , setLatitude] = useState('');
   const [timeInAddress, setTimeInAddress] = useState('');
   const [timeOutAddress, setTimeOutAddress] = useState('');
   const [progressVisible, setProgressVisible] = useState(false);
   const [timeOutConfirmation, setTimeOutConfirmation] = useState(false);
   const [assignedParcel, setAssignedParcel] = useState('');
+  const [inputTimeInModal, setInputTimeInModal] = useState(false);
+  const [screenshot, setScreenshot] = useState('');
+  const [viewScreenshot, setViewScreenshot] = useState(null);
 
   const [refresh, setRefresh]  = useState(false); 
 
@@ -41,12 +47,12 @@ function AttendanceScreen() {
 
   setUserEmail(data);
   
-  axios.get( "http://192.168.50.139:8082/retrieve-user-attendance" ,  {params: {user: data}})
+  axios.get( "https://rider-monitoring-app-backend.onrender.com/retrieve-user-attendance" ,  {params: {user: data}})
   .then(
 
   async res => {
 
-    
+   
 
 
   if(res.data.status === 400){
@@ -68,6 +74,8 @@ function AttendanceScreen() {
         setTimeInAddress("-----")
       }
       setTimeIn(res.data.data.time_in);
+      setTimeOut('-----');
+      setTimeOutAddress('');
       setStatus('time_out')
     }else{
       setConnection(true)   
@@ -81,12 +89,15 @@ function AttendanceScreen() {
         const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
         const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
         setTimeOutAddress(time_out_city_and_street);
+        console.log("testetetet")
 
       }catch{
         setTimeInAddress("-----")
         setTimeOutAddress("-----");
+        console.log("testetetet")
       }
       setTimeIn(res.data.data.time_in);
+      console.log("testetetet" , res.data.data.time_out)
       setTimeOut(res.data.data.time_out);
      
       setStatus('done') 
@@ -135,8 +146,36 @@ function AttendanceScreen() {
 
   }, [])
 
+
+  const pickImageScreenshot = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      base64: true,
+      quality: 0.1,
+      selectionLimit: 5
+    });
+    if (!result.canceled) {
+        setViewScreenshot(result.assets[0].uri)
+        setScreenshot(result.assets[0].base64)
+    }
+
+
+  
+  };
+
+  function handleInputTimeOut(){
+    router.push('/pages/parcelInput');
+  }
+
+  function handleTimInClose(){
+    setInputTimeInModal(false)
+    setViewScreenshot(null)
+    setScreenshot([])
+  }
+
   async function handleAttendanceTimeInSubmit(){
-    const data = await AsyncStorage.getItem('email');
+    const user_id = await AsyncStorage.getItem('id');
+    const email  = await AsyncStorage.getItem('email');
    
     try{
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -153,40 +192,34 @@ function AttendanceScreen() {
     }
       
     setProgressVisible(false) 
-    const attendanceData = {
-        user: userEmail,
-        time_in_coordinates: {
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude
-        },
-        time_out: '',
-        time_out_coordinates: {
-          latitude: '',
-          longitude: ''
-        }
-       
-    };  
-  
-   
-    
-    Alert.alert('Confirmation:', 'You are about to input your time in!', [
-      {
-        text: 'Cancel',
-        onPress: () => null,
-        style: 'cancel',
-      },
-      {text: 'Confirm', onPress: () =>
-        {
-        setProgressVisible(true)  ,  
+    const fd = new FormData()
+    const time_in_coordinates = {
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude
+    }
+    const time_out_coordinates = {
+      latitude: '',
+      longitude: ''
+    }
+
+    fd.append('user', email)
+    fd.append('id', user_id)
+    fd.append('time_in_coordinates', JSON.stringify(time_in_coordinates))
+    fd.append('time_out_coordinates', JSON.stringify(time_out_coordinates))
+    fd.append('assigned_parcel_screenshot', screenshot)
+    console.log(fd._parts)
+
+      setProgressVisible(true) 
       axios
-      .put("http://192.168.50.139:8082/attendance-input-time-in", attendanceData)
-      .then(res => {console.log(res.data)
-        console.log('your longitude is',longitude);
+      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-in", fd)
+      .then(res => {
 
       if(res.data.status == 200){
         setProgressVisible(false) 
         Alert.alert("Success","Attendance recorded successfully!");
         onRefresh();
+        setViewScreenshot(null)
+        setScreenshot([])
         setStatus('time_out')
        }else{    
         setProgressVisible(false) 
@@ -200,125 +233,83 @@ function AttendanceScreen() {
 
       })
       .catch(e => {console.log(e), setProgressVisible(false) })
-     }
-    },
-    ]);
-    
-        
-             
-  }
 
-
-  async function handleAttendanceTimeOutSubmit(){
-    const email = await AsyncStorage.getItem('email');
-
-
-    setProgressVisible(true)
-
-    await axios.post("http://192.168.50.139:8082/retrieve-parcel-input", {user: email})
-    .then(
-      async res => {
-       
-        if(res.data.data[0].parcel.length > 0){
-       
-
-        const dataLength = res.data.data[0].parcel.length
-        
-
-        if(res.data.data[0].parcel[dataLength-1].weekday !== res.data.weekday){
-          Alert.alert("Attendance creation failed", "Please input your total parcels!")
-          setProgressVisible(false) 
-          return
-        }
-       
-      }
-      setProgressVisible(false) 
-      })
-    .catch(e => {
-      setProgressVisible(false) 
-      console.log(e);
-    })  
-  
-   
-    try{
-    
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if(status !== 'granted'){
-       setProgressVisible(false)
-        console.log("Please grant location permissions");
-        return;
-    }
-
-    var currentLocation = await Location.getCurrentPositionAsync({});
-   }catch{
-      setProgressVisible(false)
-   }
-      setProgressVisible(false)
-
-    let timeoutLatitude = currentLocation.coords.latitude;
-    let timeoutLongitude = currentLocation.coords.longitude;
-
-    time_out_input = currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})
-
-    const attendanceData = {
-      user: userEmail,
-      time_out_coordinates : {
-        latitude: timeoutLatitude,
-        longitude : timeoutLongitude
-      },
-      assignedParcel: assignedParcel
+      setInputTimeInModal(false)
 
     }
-
-
-    Alert.alert('Confirmation:', 'You are about to input your time out!', [
-      {
-        text: 'Cancel',
-        onPress: () => null,
-        style: 'cancel',
-      },
-      {text: 'Confirm', onPress: () => 
-       {
-        setProgressVisible(true) 
-       axios
-      .put("http://192.168.50.139:8082/attendance-input-time-out", attendanceData)
-      .then(res => {console.log(res.data)
-
-      if(res.data.status == 200){
-        setProgressVisible(false) 
-        Alert.alert("Success","Attendance recorded successfully!");
-        onRefresh();
-        setAssignedParcel('')
-        // setTimeOutConfirmation(false)
-        setStatus('done')
-       }else{   
-        setProgressVisible(false)  
-        Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
-          {
-              text: 'OK'
-          }
-        ]);
-       }
-       
-
-      })
-      .catch(e => {console.log(e), setProgressVisible(false) })
-      }
-     },
-    ]);
-
-
-
     
-    
-        
-             
-  }
-
     return (
     <SafeAreaView style={{flex: 1 }}>
      <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
      <View style={{flex:1, marginTop: 35}}>
+
+     <Dialog
+      visible={inputTimeInModal}
+      title="Enter your assigned parcel:" 
+      animationType='fade'>
+    <View style={viewScreenshot? {height: 400} : {height : 120}}>
+      <View>
+      
+      <TouchableOpacity 
+                    style={cardStyles.inputImageButton}
+                    onPress={pickImageScreenshot}
+                    >
+                        <View>
+                        <Icon
+                          name="image-plus"
+                          size={25}
+                          color="black"
+                        />
+                           
+                        </View>
+      </TouchableOpacity>
+
+      {viewScreenshot !== null &&(
+                <View style={cardStyles.imgPick}>
+                
+                        <View style={{marginTop : 20, marginVertical:5, alignItems : 'center' , alignContent : 'center' }}>
+                            <Image
+                         
+                            source={{uri: viewScreenshot}}
+                            style={{width: smallerSize, height: 250, borderWidth : 2,   borderColor: '#405D72',}}/>
+                        
+
+                        </View>
+                         
+                  
+                </View>
+                    )
+                }
+      </View>
+      <View style={{flex:1, alignItems: 'flex-end' }}>
+        <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: '5%'}}>
+
+      <TouchableOpacity 
+       style={styles.confirmTimeInParcel}
+       onPress={() => handleTimInClose() }
+      >
+          <View>
+              <Text style={{ fontSize:15}}>
+                  Cancel
+              </Text>
+          </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+       style={styles.confirmTimeInParcel}
+       onPress={() => handleAttendanceTimeInSubmit() }
+      >
+          <View>
+          <Text style={{ fontSize:15}}>
+                  Confirm
+              </Text>
+          </View>
+      </TouchableOpacity>
+
+      </View>
+      </View>
+    </View>
+    </Dialog>
 
      <ProgressDialog
                  visible={progressVisible}
@@ -326,50 +317,13 @@ function AttendanceScreen() {
                  message="Please, wait..."
       />
 
-    <ConfirmDialog
-      title="Time out"
-      visible={timeOutConfirmation}
-      positiveButton={{
-        titleStyle: {color: "#41749b"},
-        title: "Confirm",
-        onPress: () => handleAttendanceTimeOutSubmit()
-      }} 
-
-      negativeButton={{
-        titleStyle: {color: "#41749b"},
-        title: "Cancel",
-        onPress: () => setTimeOutConfirmation(false)
-      }}
-      >
-  
-      <View>
-        <Text style={{marginBottom: 20,alignSelf: 'flex-start', fontSize: 15,  color:'#000000'}}>
-         Please input your Assigned Parcels
-        </Text>
-        <TextInput 
-            mode="outlined"
-            placeholderTextColor="#76ABAE" 
-            theme={{
-              colors: {
-                    text: 'white',
-                 }
-           }}
-            style={{textAlign:"left", width: "100%"}}
-            onChangeText={inputText => setAssignedParcel(inputText)}
-            defaultValue={assignedParcel}
-            keyboardType="number-pad"
-            maxLength={4}     />   
-      </View>
-    </ConfirmDialog>
-
-
       <View style={cardStyles.cardView}>
-      <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 40, fontWeight: '800',  color:'#FFFFFF'}}>
+        <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 40, fontWeight: '800',  color:'#FFFFFF'}}>
 
-        {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})}
+          {currentDateTime.toLocaleString('en-us',{hour:'numeric', minute:'numeric', second:'numeric'})}
 
-      </Text>
-      <View style={{marginTop: 10}}>
+        </Text>
+        <View style={{marginTop: 10}}>
        <Text style={{alignSelf: 'center', fontSize:20, fontWeight: '500',  color:'#FFFFFF'}}>
        
        {currentDateTime.toLocaleString('en-us',{month:'short', day:'numeric' ,year:'numeric', getDay:'number', weekday:'short' })}
@@ -439,7 +393,7 @@ function AttendanceScreen() {
        </View>
        
        }
-      </View>  
+      </View>
 
      
      </View>
@@ -448,7 +402,7 @@ function AttendanceScreen() {
       <View style={styles.button}>
       <TouchableOpacity 
        style={styles.timeButton}
-       onPress={() => handleAttendanceTimeInSubmit() }
+       onPress={() => setInputTimeInModal(true) }
       >
           <View>
               <Text style={styles.textSign}>
@@ -465,7 +419,7 @@ function AttendanceScreen() {
      <View style={styles.button}>
      <TouchableOpacity   
       style={styles.timeButton}
-      onPress={() => handleAttendanceTimeOutSubmit()}
+      onPress = {() => handleInputTimeOut()}
      >
     <View>
      <Text style={styles.textSign}>
@@ -477,20 +431,18 @@ function AttendanceScreen() {
    )
   }
 
-  {status === "no_internet" &&(
+  {/* {status === "no_internet" &&(
 
   <View>
  
     </View>
     )
-  }
+  } */}
+  <View style={{marginTop: 5}}>
+   
+  </View>
 
      </ScrollView>
-
-  
-
- 
-
      </SafeAreaView>
 
     );
@@ -535,15 +487,22 @@ const styles = StyleSheet.create({
       width: '100%',
       backgroundColor: '#420475',
       alignItems: 'center',
-      // marginTop: -320,
       paddingHorizontal: 15,
       paddingVertical: 15,
       borderRadius: 10,
+      shadowColor: 'black',
+      margin: 10,
+      borderColor : 'black',
+      elevation: 5
     },
     textSign: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: 'bold',
       color: 'white',
+    },
+    confirmTimeInParcel: {
+   
+      marginHorizontal: 5
     },
 
 });
@@ -567,10 +526,10 @@ const cardStyles = StyleSheet.create({
     shadowOffset:{width: 0, height:0},
     shadowOpacity: 1,
     shadowRadius: 8,
-    borderRadius: 36,
+    borderTopEndRadius:10,
+    borderTopStartRadius: 10,
     paddingHorizontal: 16,
     marginHorizontal: 16,
-    margin: 6
   },
   timeCardView:{
     height: 300,
@@ -583,9 +542,28 @@ const cardStyles = StyleSheet.create({
     shadowOffset:{width: 0, height:0},
     shadowOpacity: 1,
     shadowRadius: 8,
-    borderRadius: 10,
     paddingHorizontal: 16,
     marginHorizontal: 16,
-    margin: 6
-  }
+    borderBottomStartRadius: 10,
+    borderBottomEndRadius: 10,
+    borderColor: '#420475',
+    borderBlockColor: '#420475',
+  },
+  inputImageButton: {
+    width: '100%',
+    backgroundColor: '#F5F7F8',
+    height:'300px',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 25,
+    borderRadius: 10,
+    borderColor: '#405D72',
+    borderWidth: 1,
+},
+imgPick: {
+  alignItems: 'center',
+  alignContent: 'center',
+  marginTop: 1,
+  marginBottom: 1,
+},
 })

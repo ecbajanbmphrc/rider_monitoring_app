@@ -46,7 +46,7 @@ function LoginPage({navigation}){
       if(!passwordVerify) return Alert.alert('Please input your password!');
       
        setProgressVisible(true)
-      axios.post("http://192.168.50.139:8082/login-user", userData)
+      axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
         .then(
         res => {
             console.log(res.data)
@@ -54,7 +54,7 @@ function LoginPage({navigation}){
             // <ProgressDialog visible={false} />  
          
             setProgressVisible(false) 
-            Alert.alert('Login Successful');
+            Alert.alert('Login Success!');
             AsyncStorage.setItem('token', res.data.data);
             AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
             AsyncStorage.setItem('email', res.data.email);
