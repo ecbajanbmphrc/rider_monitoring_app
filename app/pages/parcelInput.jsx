@@ -2,17 +2,14 @@ const {View, Text,Image, TouchableOpacity, ScrollView, Alert, StyleSheet} = requ
 import styles from '../auth/style';
 import { Card, TextInput } from 'react-native-paper';
 import { useState } from 'react';
-import { CheckBox } from '@rneui/themed';
-import * as React from "react";
 import axios from 'axios';
 import { useRouter} from 'expo-router';
 import { ProgressDialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-// import { launchImageLibrary } from 'react-native-image-picker';
-// import * as ImagePicker from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { FlatList, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 
 
 
@@ -43,6 +40,7 @@ function  ParcelInput({props}){
     const [deliveredParcelBulk, setDeliveredParcelBulk] = useState('');
     const [deliveredParcelBulkVerify, setDeliveredParcelBulkVerify] = useState(false);
     const [deliveredParcelTotal, setDeliveredParcelTotal] = useState('0');
+    const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
     const pickImageReceipt = async () => {
         let imageList = [];
@@ -185,6 +183,47 @@ function  ParcelInput({props}){
 
         const data = await AsyncStorage.getItem('id');
         const email = await AsyncStorage.getItem('email');    
+
+
+    
+
+           
+
+
+            
+        Alert.alert('Confirmation:', 'You are about to input your parcel!', [
+            {
+              text: 'Cancel',
+              onPress: () => null,
+              style: 'cancel',
+            },
+            {text: 'Confirm', onPress: async() =>
+            {
+            setProgressVisible(true)   
+            var currentLocation;
+           
+            try{
+            let { status } = await Location.requestForegroundPermissionsAsync();
+              setProgressVisible(true) 
+              if(status !== 'granted'){
+                  console.log("Please grant location permissions");
+                  setProgressVisible(false) 
+                  return
+              }else{
+                currentLocation = await Location.getCurrentPositionAsync({});
+              }
+        
+         
+        
+            }catch{
+              currentLocation = null;
+            }
+
+
+        const time_out_coordinates = {
+                latitude: currentLocation ? currentLocation.coords.latitude : null,
+                longitude: currentLocation ? currentLocation.coords.longitude : null
+        }   
         
  
         
@@ -199,39 +238,34 @@ function  ParcelInput({props}){
         fd.append('delivered_parcel_bulk_count', deliveredParcelBulk? deliveredParcelBulk : 0)
         fd.append('delivered_parcel_total', deliveredParcelTotal)
         fd.append('remaining_parcel', remainingParcel)
+        fd.append('time_out_coordinates',  JSON.stringify(time_out_coordinates))
+        console.log(time_out_coordinates);
         fd.append('screenshot', screenshot)
         receipt.forEach(receipt => {
             fd.append(
                 "receipt",receipt
-            ); });
-
-           
-
+            ); }); 
+            axios
+            .post(`${apiHost}/parcel-input`, fd)
+            .then(res => {
 
             
-        Alert.alert('Confirmation:', 'You are about to input your parcel!', [
-            {
-              text: 'Cancel',
-              onPress: () => null,
-              style: 'cancel',
-            },
-            {text: 'Confirm', onPress: () =>
-            {
-            setProgressVisible(true)    
-            axios
-            .post("https://rider-monitoring-app-backend.onrender.com/parcel-input", fd)
-            .then(res => {
              
-       
+      
             if(res.data.status == 200){
                 setProgressVisible(false)    
-                Alert.alert("Success!","Parcel recorded successfully.");
+                Alert.alert("Success!","Attendance recorded successfully.");
                 // router.replace('/(tabs)/dashboard');
                 router.back();
             
+             }
+            else if(res.data.status == 412) 
+             {
+                setProgressVisible(false)   
+                Alert.alert("Unable to proceed!", res.data.data);
              }else{    
               setProgressVisible(false)  
-              Alert.alert("Parcel creation failed",JSON.stringify(res.data.data), [
+              Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
                 {
                     text: 'OK'
                 }
@@ -270,7 +304,7 @@ function  ParcelInput({props}){
         setAssignedParcelTotal((handleAssignedParcelTotal( assignedParcelNonBulk? assignedParcelNonBulk: 0, textVar? textVar: 0  )).toString());
         if(deliveredParcelTotal > 1){
             setRemainingParcel((handleRemainingParcel(deliveredParcelNonBulk? deliveredParcelNonBulk : 0, deliveredParcelBulk? deliveredParcelBulk : 0, assignedParcelNonBulk? assignedParcelNonBulk : 0, textVar? textVar : 0)).toString());
-            }else{setRemainingParcel('0')}
+            }else{setRemainingParcel('0')} 
 
         if(/([0-9])/.test(textVar)){
             setAssignedParcelBulkVerify(true);

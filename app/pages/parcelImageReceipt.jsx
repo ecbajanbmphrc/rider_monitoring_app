@@ -1,11 +1,8 @@
 const {View, Image,  ScrollView, StyleSheet} = require('react-native');
-import { useState } from 'react';
-import * as React from "react";
-import axios from 'axios';
+import { useState } from 'react'
 import {  useLocalSearchParams, useFocusEffect} from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, useWindowDimensions } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 

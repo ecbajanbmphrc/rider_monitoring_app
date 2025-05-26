@@ -16,6 +16,7 @@
     "@gorhom/bottom-sheet": "^4.6.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/masked-view": "^0.1.11",
+    "@react-native-community/netinfo": "^11.4.1",
     "@react-native-vector-icons/entypo": "^1.0.1-alpha.9",
     "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native-stack": "^6.9.26",
@@ -31,12 +32,15 @@
     "expo-location": "~16.5.5",
     "expo-router": "~3.4.10",
     "expo-status-bar": "~1.11.1",
+    "moment": "^2.30.1",
     "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-native": "0.73.6",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-gifted-charts": "^1.4.10",
     "react-native-image-picker": "^7.1.2",
+    "react-native-indicators": "^0.17.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-paper": "^5.12.3",
     "react-native-paper-dropdown": "^2.3.1",
@@ -46,7 +50,8 @@
     "react-native-select-dropdown": "^4.0.1",
     "react-native-simple-dialogs": "^2.1.0",
     "react-native-splash-screen": "^3.3.0",
-    "react-native-svg": "^15.1.0"
+    "react-native-svg": "^15.1.0",
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

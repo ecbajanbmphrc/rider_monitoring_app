@@ -10,13 +10,15 @@ import styles from "./style";
 import { TextInput, Provider as PaperProvider } from "react-native-paper";
 import { useState } from "react";
 import { CheckBox } from "@rneui/themed";
-import * as React from "react";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { ProgressDialog } from "react-native-simple-dialogs";
-// import { Dropdown } from 'react-native-paper-dropdown';
 import DropDownPicker from "react-native-dropdown-picker";
-import { color } from "@rneui/base";
+import NetInfo from "@react-native-community/netinfo";
+import { useFocusEffect } from 'expo-router';
+import {DotIndicator} from 'react-native-indicators';
+import { useCallback } from 'react';
+
 
 function RegisterPage({ props }) {
   const [riderId, setRiderId] = useState("");
@@ -42,7 +44,10 @@ function RegisterPage({ props }) {
   const toggleCheckbox = () => setChecked(!checked);
   const router = useRouter();
   const [progressVisible, setProgressVisible] = useState(false);
-  const [gender, setGender] = useState("");
+  const [loadHubList, setLoadHubList] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const apiHost = process.env.EXPO_PUBLIC_API_URL;
+
 
   const [openType, setOpenType] = useState(false);
   const [riderType, setRiderType] = useState(null);
@@ -52,7 +57,60 @@ function RegisterPage({ props }) {
     { label: "4 Wheels", value: "4WH" },
     { label: "FLEXI", value: "FLEXI" },
     { label: "MOBILE HUB", value: "MOBILE HUB" },
+    { label: "MOBILE HUB", value: "MOBILE HUB2" },
   ]);
+
+  const [openHubList, setOpenHubList] = useState(false);
+  const [hub, setHub] = useState(null);
+  const [hubItems, setHubItems] = useState([]);
+  const [testNet, setTestNet] = useState();
+
+   useFocusEffect(
+      useCallback(() => {
+       getHubList();
+      }, [])
+    );
+
+  async function getHubList(){
+
+    var net;
+
+    await NetInfo.fetch().then(async state => {
+
+    state.isInternetReachable? net = true : net = false;
+
+    console.log("Connection type", state.type);
+    console.log("Is connected?", state.isInternetReachable);
+       
+   
+    })
+
+    console.log("test", net)
+    
+    if(!net){ 
+       setPageLoading(false)
+       setLoadHubList(false)
+       return
+    }
+
+  axios.get( `${apiHost}/get-hub-list` , )
+  .then(
+
+   
+  async res => {
+    setHubItems(res.data.data);
+    setLoadHubList(true);
+    setPageLoading(false);
+  })
+  .catch(e => {
+    setPageLoading(false)
+    setLoadHubList(false)
+    console.log(e)
+   
+    })
+
+
+  }  
 
   function handleSubmit() {
   
@@ -72,7 +130,7 @@ function RegisterPage({ props }) {
         return Alert.alert("Password does not match");
       setProgressVisible(true);
       axios
-        .post("https://rider-monitoring-app-backend.onrender.com/send-otp-register", { email: email })
+        .post(`${apiHost}/send-otp-register`, { email: email })
         .then((res) => {
           if (res.data.status == 200) {
            
@@ -215,15 +273,26 @@ function RegisterPage({ props }) {
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled={true}
       style={{ backgroundColor: "white" }}
-    >
-      <View>
+    > 
+      {pageLoading? 
+
+      <DotIndicator
+        color= 'rgb(61, 61, 61)'
+        size =  {12}
+        count = {5}
+         />
+     
+      :
+    loadHubList? 
+       
+         <View>
+
         <View style={styles.loginContainer}>
           <ProgressDialog
             visible={progressVisible}
             title="Loading"
             message="Please, wait..."
           />
-
           <View style={styles.textInputRegistration}>
             <TextInput
               autoCapitalize={"words"}
@@ -248,7 +317,6 @@ function RegisterPage({ props }) {
               paddingTop: 15,
               paddingBottom: 1,
               width: "100%",
-              zIndex: 100,
             }}
            >
             <DropDownPicker
@@ -260,6 +328,7 @@ function RegisterPage({ props }) {
               setItems={setTypeItems}
               nestedScrollEnabled={true}
               listMode="SCROLLVIEW"
+              zIndex={200}
               placeholderStyle={{
                 color: "#47454a",
               }}
@@ -275,6 +344,44 @@ function RegisterPage({ props }) {
               }}
               translation={{
                 PLACEHOLDER: "Select type"
+              }}
+            />
+          </View>
+
+          <View
+            style={{
+              paddingTop: 15,
+              paddingBottom: 1,
+              width: "100%",
+            }}
+           >
+            <DropDownPicker
+              open={openHubList}
+              value={hub}
+              items={hubItems}
+              setOpen={setOpenHubList}
+              setValue={setHub}
+              setItems={setHubItems}
+              nestedScrollEnabled={true}
+              stickyHeader={true}
+              listMode="SCROLLVIEW"
+              searchable={true}
+              zIndex={100}
+              placeholderStyle={{
+                color: "#47454a",
+              }}
+              style={{
+                borderColor: "#787679",
+                backgroundColor: "#fffbff",
+              }}
+              textStyle={{
+                fontSize: 15,
+              }}
+              dropDownContainerStyle={{
+                borderColor: "#787679",
+              }}
+              translation={{
+                PLACEHOLDER: "Select Hub"
               }}
             />
           </View>
@@ -529,6 +636,20 @@ function RegisterPage({ props }) {
           </TouchableOpacity>
         </View>
       </View>
+        : 
+        
+         <View style={{alignItems:"center"}}>
+                <Image
+                        source={
+                            require('../../assets/no-network-256.png')
+                        }        
+                        style={{marginTop: '50%', height:150, width:150}}
+                      />
+                <Text style={styles.textNoConnection}>No Internet Connection</Text>
+        </View> 
+      
+          }
+         
     </ScrollView>
   );
 }

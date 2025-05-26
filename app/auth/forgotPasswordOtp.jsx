@@ -1,8 +1,6 @@
 import {React,  useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 const { Alert, Text, View,  StyleSheet, Pressable, Keyboard, BackHandler, ScrollView, TouchableOpacity} = require('react-native');
-import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
 import { TextInput } from 'react-native-paper';
 
 

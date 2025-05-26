@@ -14,6 +14,7 @@ function ForgotPasswordScreen({navigation}) {
     const [emailVerify, setEmailVerify] = useState(false);
     const router = useRouter();
     const [progressVisible, setProgressVisible] = useState(false);
+    const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
     function handleEmail(e){
       const emailVar = e.nativeEvent.text;
@@ -33,7 +34,7 @@ function ForgotPasswordScreen({navigation}) {
 
            setProgressVisible(true);
            axios
-            .post("https://rider-monitoring-app-backend.onrender.com/send-otp-forgot-password", userData)
+            .post(`${apiHost}/send-otp-forgot-password`, userData)
             .then(res => {
 
             if(res.data.status == 200){

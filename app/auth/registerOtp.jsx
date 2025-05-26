@@ -38,6 +38,7 @@ function RegisterOtp({ navigation }) {
   const [progressVisible, setProgressVisible] = useState(false);
 
   function handleSubmit() {
+    const apiHost = process.env.EXPO_PUBLIC_API_URL;
     const checkCode = otpCode;
     const userData = {
       rider_id: rider_id,
@@ -54,7 +55,7 @@ function RegisterOtp({ navigation }) {
       console.log("Success");
       setProgressVisible(true);
       axios
-        .post("https://rider-monitoring-app-backend.onrender.com/register-user-detail", userData)
+        .post(`${apiHost}/register-user-detail`, userData)
         .then((res) => {
           console.log(res.data);
 
