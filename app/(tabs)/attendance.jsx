@@ -8,15 +8,18 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import * as Location from 'expo-location';
 import { ProgressDialog, ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
-import { TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { useWindowDimensions } from 'react-native';
 import { useRouter } from "expo-router";
+import {DotIndicator} from 'react-native-indicators';
+import NetInfo from "@react-native-community/netinfo";
+import moment from 'moment';
 
 
 
-function AttendanceScreen() {setInputTimeInModal
+
+function AttendanceScreen() {
 
   
   const router = useRouter();
@@ -32,31 +35,53 @@ function AttendanceScreen() {setInputTimeInModal
   const [timeInAddress, setTimeInAddress] = useState('');
   const [timeOutAddress, setTimeOutAddress] = useState('');
   const [progressVisible, setProgressVisible] = useState(false);
-  const [timeOutConfirmation, setTimeOutConfirmation] = useState(false);
-  const [assignedParcel, setAssignedParcel] = useState('');
   const [inputTimeInModal, setInputTimeInModal] = useState(false);
   const [screenshot, setScreenshot] = useState('');
   const [viewScreenshot, setViewScreenshot] = useState(null);
+  const [loadAttendance, setLoadAttendance] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [checkValid, setCheckValid] = useState(false);
+
+  const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
   const [refresh, setRefresh]  = useState(false); 
 
   async function onRefresh(){
+
+     setPageLoading(true)  
   
   const data = await AsyncStorage.getItem('email');
+ 
+
+   var net;
+
+    await NetInfo.fetch().then(async state => {
+
+    state.isInternetReachable? net = true : net = false;
+   
+    })
+
+    
+    if(!net){ 
+       setStatus(null)
+       setPageLoading(false)
+       setLoadAttendance(false)
+       return
+    }
 
 
   setUserEmail(data);
   
-  axios.get( "https://rider-monitoring-app-backend.onrender.com/retrieve-user-attendance" ,  {params: {user: data}})
+  axios.get( `${apiHost}/retrieve-user-attendance` ,  {params: {user: data}})
   .then(
 
   async res => {
+  
 
-   
 
 
   if(res.data.status === 400){
-    setConnection(true);
+    setLoadAttendance(true);
     setStatus("time_in");
     setTimeIn('-----');
     setTimeOut('-----');
@@ -64,13 +89,17 @@ function AttendanceScreen() {setInputTimeInModal
     setTimeOutAddress('');
   }
   else if (res.data.status === 200){
+    
     if(!res.data.data.time_out){
-      setConnection(true)
+     
+      setLoadAttendance(true);
       try{
         const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
-        const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;  
+        const time_in_street = timeInAddress[0].street ? timeInAddress[0].street : timeInAddress[0].subregion;
+        const time_in_city_and_street = timeInAddress[0].city + ", " +   time_in_street;
         setTimeInAddress(time_in_city_and_street);
       }catch{
+    
         setTimeInAddress("-----")
       }
       setTimeIn(res.data.data.time_in);
@@ -78,34 +107,54 @@ function AttendanceScreen() {setInputTimeInModal
       setTimeOutAddress('');
       setStatus('time_out')
     }else{
-      setConnection(true)   
-
+      setLoadAttendance(true);
       try{
         
         const timeInAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_in_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_in_coordinates.longitude)});
-        const time_in_city_and_street = timeInAddress[0].city + ", " +  timeInAddress[0].street;
+        const time_in_street = timeInAddress[0].street ? timeInAddress[0].street : timeInAddress[0].subregion;
+        const time_in_city_and_street = timeInAddress[0].city + ", " +   time_in_street;
+
+        console.log(time_in_city_and_street)
+
         setTimeInAddress(time_in_city_and_street);
 
         const timeOutAddress = await Location.reverseGeocodeAsync({"latitude" : parseFloat(res.data.data.time_out_coordinates.latitude) , "longitude" : parseFloat(res.data.data.time_out_coordinates.longitude)});
-        const time_out_city_and_street = timeOutAddress[0].city + ", " +  timeOutAddress[0].street;
+        const time_out_street =timeOutAddress[0].street ? timeOutAddress[0].street : timeOutAddress[0].subregion;
+        const time_out_city_and_street = timeOutAddress[0].city + ", " +  time_out_street;
         setTimeOutAddress(time_out_city_and_street);
-        console.log("testetetet")
+    
 
       }catch{
         setTimeInAddress("-----")
         setTimeOutAddress("-----");
-        console.log("testetetet")
       }
       setTimeIn(res.data.data.time_in);
-      console.log("testetetet" , res.data.data.time_out)
+  
       setTimeOut(res.data.data.time_out);
-     
-      setStatus('done') 
 
+       
+    const dataDate =  res.data.data.date;
+    const dataTimeIn = res.data.data.time_in;
+    const dataTimeOut = res.data.data.time_out;
+
+    const testDate = (moment(`${dataDate} ${dataTimeOut}` , "MM-DD-YYYY hh:mm:ss A").valueOf()) - (moment(`${dataDate} ${dataTimeIn}` , "MM-DD-YYYY hh:mm:ss A").valueOf()) ;
+ 
+    
+
+    if(testDate >= 14400000)
+    {
+     setCheckValid(false);
+     setStatus('done')
+    }else{
+     setCheckValid(true);
+     setStatus('invalid')
+    }
+      
     }
     
   }
-
+  
+  setPageLoading(false)
 
   })
   .catch(e => {
@@ -116,7 +165,8 @@ function AttendanceScreen() {setInputTimeInModal
     setTimeInAddress('');
     setTimeOutAddress('');
     setStatus('no_internet');
-    setConnection(false);
+    setLoadAttendance(true);
+    setPageLoading(false)
    
     })
   };
@@ -176,6 +226,7 @@ function AttendanceScreen() {setInputTimeInModal
   async function handleAttendanceTimeInSubmit(){
     const user_id = await AsyncStorage.getItem('id');
     const email  = await AsyncStorage.getItem('email');
+    var currentLocation;
    
     try{
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -183,20 +234,38 @@ function AttendanceScreen() {setInputTimeInModal
       if(status !== 'granted'){
           console.log("Please grant location permissions");
           setProgressVisible(false) 
-          return;
+          return
+      }else{
+        currentLocation = await Location.getCurrentPositionAsync({});
       }
 
-      var currentLocation = await Location.getCurrentPositionAsync({});
+ 
+
     }catch{
-      setProgressVisible(false) 
+      currentLocation = null;
     }
+
+  //  const handleLocationUpdate = (locationResult) => { console.log(locationResult); this.setState({ locationCallbackResult: locationResult }); }
+
+  //  console.log(handleLocationUpdate);
+
+  // requestLocationCallbackWithListener = () => {
+  //   HMSLocation.FusedLocation.Native.requestLocationUpdatesWithCallbackEx(locationRequest)
+  //   .then((res) => this.setState({ reqCode: res.requestCode }))
+  //   .catch((err) => alert(err.message));
+  //   HMSLocation.FusedLocation.Events.addFusedLocationEventListener(this.handleLocationUpdate);
+  //   this.setState({ autoUpdateEnabled: true });
+  // };
+
+    
       
-    setProgressVisible(false) 
+  
     const fd = new FormData()
     const time_in_coordinates = {
-      latitude: currentLocation.coords.latitude,
-      longitude: currentLocation.coords.longitude
+      latitude: currentLocation ? currentLocation.coords.latitude : null,
+      longitude: currentLocation ? currentLocation.coords.longitude : null
     }
+
     const time_out_coordinates = {
       latitude: '',
       longitude: ''
@@ -207,21 +276,32 @@ function AttendanceScreen() {setInputTimeInModal
     fd.append('time_in_coordinates', JSON.stringify(time_in_coordinates))
     fd.append('time_out_coordinates', JSON.stringify(time_out_coordinates))
     fd.append('assigned_parcel_screenshot', screenshot)
-    console.log(fd._parts)
 
-      setProgressVisible(true) 
+     
       axios
-      .put("https://rider-monitoring-app-backend.onrender.com/attendance-input-time-in", fd)
+      .put(`${apiHost}/attendance-input-time-in`, fd)
       .then(res => {
 
-      if(res.data.status == 200){
+       
+  
+       if(res.data.status == 200){
         setProgressVisible(false) 
         Alert.alert("Success","Attendance recorded successfully!");
         onRefresh();
         setViewScreenshot(null)
         setScreenshot([])
         setStatus('time_out')
-       }else{    
+       }
+       else if(res.data.status == 412){
+        setProgressVisible(false) 
+        Alert.alert("Unable to proceed!", res.data.data);
+        onRefresh();
+        
+        setViewScreenshot(null)
+        setScreenshot([])
+        setStatus('time_out')
+       }
+       else{    
         setProgressVisible(false) 
         Alert.alert("Attendance creation failed",JSON.stringify(res.data.data), [
           {
@@ -241,6 +321,22 @@ function AttendanceScreen() {setInputTimeInModal
     return (
     <SafeAreaView style={{flex: 1 }}>
      <ScrollView refreshControl={<RefreshControl refreshing = {refresh} onRefresh={onRefresh}/>}>
+     <View>
+      
+     <ProgressDialog
+                 visible={progressVisible}
+                 title="Loading"
+                 message="Please, wait..."
+      />
+      {pageLoading?
+               <View style={{alignItems: 'center', marginVertical: '75%'}}>
+                 <DotIndicator
+                   color= 'rgb(61, 61, 61)'
+                   size =  {12}
+                   count = {5}
+                 />
+                 </View>
+                 :
      <View style={{flex:1, marginTop: 35}}>
 
      <Dialog
@@ -249,6 +345,7 @@ function AttendanceScreen() {setInputTimeInModal
       animationType='fade'>
     <View style={viewScreenshot? {height: 400} : {height : 120}}>
       <View>
+
       
       <TouchableOpacity 
                     style={cardStyles.inputImageButton}
@@ -280,6 +377,7 @@ function AttendanceScreen() {setInputTimeInModal
                 </View>
                     )
                 }
+
       </View>
       <View style={{flex:1, alignItems: 'flex-end' }}>
         <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: '5%'}}>
@@ -311,11 +409,6 @@ function AttendanceScreen() {setInputTimeInModal
     </View>
     </Dialog>
 
-     <ProgressDialog
-                 visible={progressVisible}
-                 title="Loading"
-                 message="Please, wait..."
-      />
 
       <View style={cardStyles.cardView}>
         <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 40, fontWeight: '800',  color:'#FFFFFF'}}>
@@ -332,10 +425,11 @@ function AttendanceScreen() {setInputTimeInModal
        </View> 
       </View>  
 
-      <View style={cardStyles.timeCardView}>
-       {connection? 
+      <View style={[cardStyles.timeCardView,  {height: checkValid? 400 : 300}]}>
+
+           {loadAttendance? 
        <View>
-        <Text style={{marginTop: 5,alignSelf: 'center', fontSize: 35, fontWeight: '500',  color:'#000000'}}>
+        <Text style={{marginTop: 1,alignSelf: 'center', fontSize: 35, fontWeight: '500',  color:'#000000'}}>
           Time In:
         </Text>
       <Text style={{marginTop: 10,alignSelf: 'center', fontSize: 25, fontWeight: '500',  color:'#000000'}}>
@@ -379,6 +473,19 @@ function AttendanceScreen() {setInputTimeInModal
         
 
       </Text>
+      {status === "invalid" &&(
+
+     <View style={styles.warningCard}>
+    
+      <View>
+        <Text style={styles.textWarning}>
+            Note: Please validate your attendance to your supervisor.
+        </Text>
+      </View>
+ 
+    </View>
+   )
+  }
       </View>
        :
        <View style={{alignItems:"center"}}>
@@ -386,19 +493,18 @@ function AttendanceScreen() {setInputTimeInModal
                 source={
                     require('../../assets/no-network-256.png')
                 }
+                alt='this is image'
                 
-                style={{marginTop: 5, height:150, width:150}}
+                style={{marginTop:'50%', height:150, width:150}}
               />
         <Text style={styles.textNoConnection}>No Internet Connection</Text>
        </View>
        
        }
+    
       </View>
 
-     
-     </View>
-
-    {status === "time_in" &&(
+      {status === "time_in" &&(
       <View style={styles.button}>
       <TouchableOpacity 
        style={styles.timeButton}
@@ -414,7 +520,7 @@ function AttendanceScreen() {setInputTimeInModal
      )
     }
 
-    {status === "time_out" &&(
+     {status === "time_out" &&(
 
      <View style={styles.button}>
      <TouchableOpacity   
@@ -431,15 +537,34 @@ function AttendanceScreen() {setInputTimeInModal
    )
   }
 
-  {/* {status === "no_internet" &&(
+  
+     {/* {status === "invalid" &&(
 
-  <View>
- 
+     <View>
+    
+    <View>
+     <Text style={styles.textWarning}>
+         Time Out
+     </Text>
     </View>
-    )
+ 
+  </View>
+   )
   } */}
-  <View style={{marginTop: 5}}>
+
+ <View style={{marginTop: 100}}>
    
+  </View>
+
+     
+     </View>
+
+
+
+   
+  
+    
+}
   </View>
 
      </ScrollView>
@@ -500,6 +625,17 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       color: 'white',
     },
+     textWarning: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: 'red',
+    },
+     warningCard: {
+      height: 120,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 5,
+      },
     confirmTimeInParcel: {
    
       marginHorizontal: 5
@@ -532,7 +668,6 @@ const cardStyles = StyleSheet.create({
     marginHorizontal: 16,
   },
   timeCardView:{
-    height: 300,
     width: '93%',
     alignItems: 'center',
     justifyContent: 'center',

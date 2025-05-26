@@ -37,6 +37,7 @@ function ParcelScreen() {
   const [selectType , setSelectType] = useState('');
   const [progressVisible, setProgressVisible] = useState(false);
   const [inputNow , setInputNow] = useState(true);
+  const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
  
  
@@ -104,7 +105,7 @@ function ParcelScreen() {
     const email = await AsyncStorage.getItem('email');
     
     
-    axios.post("https://rider-monitoring-app-backend.onrender.com/retrieve-parcel-input", {user: email})
+    axios.post(`${apiHost}/retrieve-parcel-input`, {user: email})
     .then(
       async res => {
        
@@ -174,20 +175,7 @@ function ParcelScreen() {
       }
 
    
-       {inputNow?
-       <></>
-       :
-       <TouchableOpacity
-       style={styles.circle}
-       onPress={() => {
-         handlePopUpModal()
-         }}
-       >
-        <Icon name='package-variant-closed' size={30} color="#FFFFFF"/> 
-           
-      </TouchableOpacity>
-     
-        }
+
       </View>
      </BottomSheetModalProvider>
         

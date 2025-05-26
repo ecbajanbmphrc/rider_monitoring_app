@@ -19,6 +19,7 @@ function ResetPasswordScreen({navigation}) {
     const toggleCheckbox = () => setChecked(!checked);
     const router = useRouter();
     const [progressVisible, setProgressVisible] = useState(false);
+    const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
     const { email} = useLocalSearchParams();
 
@@ -34,7 +35,7 @@ function ResetPasswordScreen({navigation}) {
           if(password !== confirmPassword)  return  Alert.alert('Password does not match')
           setProgressVisible(true);
           axios
-          .put("https://rider-monitoring-app-backend.onrender.com/forgot-password-reset", userData)
+          .put(`${apiHost}forgot-password-reset`, userData)
           .then(res => {
 
           if(res.data.status == 200){

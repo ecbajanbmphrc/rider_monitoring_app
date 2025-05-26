@@ -31,13 +31,14 @@ function LoginPage({navigation}){
     const [progressVisible, setProgressVisible] = useState(false);
 
     const router = useRouter();
+    const apiHost = process.env.EXPO_PUBLIC_API_URL;
    
     
 
 
 
     function handleLogin(){
-        console.log(email, password);
+    
         const userData = {
             email: email,
             password,
@@ -46,10 +47,10 @@ function LoginPage({navigation}){
       if(!passwordVerify) return Alert.alert('Please input your password!');
       
        setProgressVisible(true)
-      axios.post("https://rider-monitoring-app-backend.onrender.com/login-user", userData)
+      axios.post(`${apiHost}/login-user`, userData)
         .then(
         res => {
-            console.log(res.data)
+ 
         if(res.data.status === 200){
             // <ProgressDialog visible={false} />  
          
@@ -207,6 +208,19 @@ function LoginPage({navigation}){
                             </Text>
                         </View>
                     </TouchableOpacity>
+                </View>
+                <View
+                  style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: 8,
+                    }}>
+                    <Text
+                        style={{
+                        color: 'gray'
+                    }}>
+                        version 1.2.0
+                    </Text>
                 </View>
          </View>
     </ScrollView>

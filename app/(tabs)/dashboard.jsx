@@ -8,6 +8,8 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {DotIndicator} from 'react-native-indicators';
+import NetInfo from "@react-native-community/netinfo";
 
 
 function DashboardScreen({navigation}) {
@@ -17,7 +19,7 @@ function DashboardScreen({navigation}) {
   const [totalParcel, setTotalParcel] = useState(0);
   const [totalBulk, setTotalBulk] = useState(0);
   const [totalNonBulk, setTotalNonBulk] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const [mondayParcel, setMondayParcel] = useState(0);
   const [tuesdayParcel, setTuesdayParcel] = useState(0);
@@ -26,6 +28,9 @@ function DashboardScreen({navigation}) {
   const [fridayParcel, setFridayParcel] = useState(0);
   const [saturdayParcel, setSaturdayParcel] = useState(0);
   const [sundayParcel, setSundayParcel] = useState(0);
+
+  const [loadDashboard, setLoadDashboard] = useState(false);
+  const apiHost = process.env.EXPO_PUBLIC_API_URL;
 
   var pieData = [
     {value: totalBulk, color: '#FF204E'},
@@ -68,14 +73,31 @@ function DashboardScreen({navigation}) {
 
     const email = await AsyncStorage.getItem('email');
     const dateToday = new Date().toLocaleString('en-us',{month:'numeric', day:'numeric' ,year:'numeric'});
+
+    var net;
+
+    await NetInfo.fetch().then(async state => {
+
+    state.isInternetReachable? net = true : net = false;
+   
+    })
+
+ 
     
-    axios.post("https://rider-monitoring-app-backend.onrender.com/get-user-data-dashboard", {email: email , date : dateToday})
+    if(!net){ 
+       setPageLoading(false)
+       setLoadDashboard(false)
+       return
+    }
+
+    
+    axios.post(`${apiHost}/get-user-data-dashboard`, {email: email , date : dateToday})
     .then(
       async res => {
     
         const data = await res.data;
 
-        console.log(data.userParcelPerDay, "test")
+
 
 
        
@@ -96,7 +118,7 @@ function DashboardScreen({navigation}) {
       if(res.data.status === 200){
 
         if(data.data.length !== 0){
-          console.log(res.data.data[0])
+   
           setTotalBulk(res.data.data[0].delivered_parcel_bulk_count)
           setTotalNonBulk(res.data.data[0].delivered_parcel_non_bulk_count)
           setTotalParcel(res.data.data[0].delivered_parcel_total)
@@ -137,14 +159,16 @@ function DashboardScreen({navigation}) {
         setTotalParcel(0)
      
       }  
-      setIsLoading(false)
+      setLoadDashboard(true)
+      setPageLoading(false)
       })
     .catch(e => {
 
       setTotalBulk(0)
       setTotalNonBulk(0)
       setTotalParcel(0)
-      setIsLoading(false)
+      setPageLoading(false)
+       setLoadDashboard(false)
      
       console.log(e);
     })  
@@ -159,11 +183,16 @@ function DashboardScreen({navigation}) {
     return (
     
         <View>
-          {isLoading?
-            <View style={{alignItems: 'center', marginVertical: '75%'}}>
-              <Image style={styles.logo} source = {require('../../assets/dual_ball_loading.gif')}/>
+          {pageLoading?
+          <View style={{alignItems: 'center', marginVertical: '75%'}}>
+            <DotIndicator
+              color= 'rgb(61, 61, 61)'
+              size =  {12}
+              count = {5}
+            />
             </View>
             :
+            loadDashboard?
             <View>
             <View style={styles.box}>
         
@@ -228,7 +257,16 @@ function DashboardScreen({navigation}) {
         
           
             </View>  
-          </View>
+          </View>:
+          <View style={{alignItems:"center"}}>
+                <Image
+                        source={
+                            require('../../assets/no-network-256.png')
+                        }        
+                        style={{marginTop: '50%', height:150, width:150}}
+                      />
+                <Text style={styles.textNoConnection}>No Internet Connection</Text>
+        </View> 
             }
           </View>
           
