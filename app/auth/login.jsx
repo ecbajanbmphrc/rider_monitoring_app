@@ -38,7 +38,7 @@ function LoginPage({navigation}){
 
 
     function handleLogin(){
-    
+     
         const userData = {
             email: email,
             password,

@@ -48,6 +48,8 @@ function AttendanceScreen() {
 
   async function onRefresh(){
 
+     console.log(apiHost)
+
      setPageLoading(true)  
   
   const data = await AsyncStorage.getItem('email');

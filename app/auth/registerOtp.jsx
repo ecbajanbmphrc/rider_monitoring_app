@@ -28,6 +28,7 @@ function RegisterOtp({ navigation }) {
     last_name,
     phone,
     address,
+    hub_id,
     password,
   } = useLocalSearchParams();
 
@@ -39,6 +40,8 @@ function RegisterOtp({ navigation }) {
 
   function handleSubmit() {
     const apiHost = process.env.EXPO_PUBLIC_API_URL;
+
+
     const checkCode = otpCode;
     const userData = {
       rider_id: rider_id,
@@ -49,15 +52,16 @@ function RegisterOtp({ navigation }) {
       email: email,
       phone: phone,
       address: address,
+      hub_id: hub_id,
       password: password,
     };
     if (checkCode === code) {
-      console.log("Success");
+    
       setProgressVisible(true);
       axios
         .post(`${apiHost}/register-user-detail`, userData)
         .then((res) => {
-          console.log(res.data);
+       
 
           if (res.data.status == 200) {
             setProgressVisible(false);
