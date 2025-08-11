@@ -35,12 +35,12 @@ function ResetPasswordScreen({navigation}) {
           if(password !== confirmPassword)  return  Alert.alert('Password does not match')
           setProgressVisible(true);
           axios
-          .put(`${apiHost}forgot-password-reset`, userData)
+          .put(`${apiHost}/forgot-password-reset`, userData)
           .then(res => {
 
           if(res.data.status == 200){
             setProgressVisible(false);
-            Alert.alert("Password is successfully reset!");
+            Alert.alert("Success","Password is successfully reset!");
             router.replace('auth/login');
          
            }else{   

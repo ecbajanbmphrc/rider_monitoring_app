@@ -55,9 +55,10 @@ function RegisterPage({ props }) {
     { label: "2 Wheels", value: "2WH" },
     { label: "3 Wheels", value: "3WH" },
     { label: "4 Wheels", value: "4WH" },
+    { label: "WALKER", value: "WALKER" },
     { label: "FLEXI", value: "FLEXI" },
     { label: "MOBILE HUB", value: "MOBILE HUB" },
-    { label: "MOBILE HUB", value: "MOBILE HUB2" },
+
   ]);
 
   const [openHubList, setOpenHubList] = useState(false);
@@ -73,15 +74,14 @@ function RegisterPage({ props }) {
 
   async function getHubList(){
 
+
     var net;
 
     await NetInfo.fetch().then(async state => {
 
     state.isInternetReachable? net = true : net = false;
 
-    console.log("Connection type", state.type);
-    console.log("Is connected?", state.isInternetReachable);
-       
+    console.log("test" , apiHost);
    
     })
 
@@ -113,9 +113,17 @@ function RegisterPage({ props }) {
   }  
 
   function handleSubmit() {
+
   
 
-    if (riderType === null) return Alert.alert("Unable to Proceed" , "Please select type!");
+
+  
+
+    if (!riderType) return Alert.alert("Unable to Proceed" , "Please select type!");
+    
+    if (!hub) return Alert.alert("Unable to Proceed" , "Please hub!");
+
+   
 
     if (
       firstNameVerify &&
@@ -136,6 +144,8 @@ function RegisterPage({ props }) {
            
             setProgressVisible(false);
 
+        
+
             router.push({
               pathname: "auth/registerOtp",
               params: {
@@ -149,9 +159,12 @@ function RegisterPage({ props }) {
                 email: email,
                 phone: phone,
                 address: address,
+                hub_id: hub,
                 password: password,
               },
             });
+
+            
           } else {
             setProgressVisible(false);
             Alert.alert(
